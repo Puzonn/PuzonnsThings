@@ -1,0 +1,56 @@
+﻿.LobbyContainer {
+    display: flex;
+    justify-content: center;
+    margin-left: 0%;
+}
+.container
+{
+    color: white;
+}
+.LobbyText 
+{
+    margin-left:0%;
+}
+.btnStartGame
+{
+    background: #181a1b;
+    border: none;
+    width: 200px;
+    height: 30px;
+    height: 40;
+    color: white;
+}
+img
+{
+    max-width: 100%;
+}
+.CardContainer
+{
+    display: flex;
+    align-items: center;
+    position:absolute;
+    bottom:0;
+}
+.CardOnTop
+{
+    display: flex;
+    justify-content: center;
+    padding-bottom: 50;
+}
+.LobbyTextContainer
+{
+    display: flex;
+    flex-direction: column;
+}
+.LobbyDisplay
+{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+.PlayerTurnAndNext
+{
+    display: flex;
+    justify-content: center;
+}
