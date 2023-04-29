@@ -1,7 +1,8 @@
 # PuzonnsThings
-website: https://puzonnsthings.pl
+Website: https://puzonnsthings.pl
 
 ### Auth
+ - Jwt Authentication
  - Users
  - Loggin in
  - Registering
