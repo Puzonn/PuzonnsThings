@@ -1,0 +1,139 @@
+.App {
+  color: white;
+}
+
+input[type="text"],
+input[type="password"],
+input[type="submit"],
+button {
+  border-radius: 8px;
+  padding: 7px 9px;
+  margin: 8px 0;
+  box-sizing: border-box;
+}
+
+.login-form {
+  color: white;
+  text-align: center;
+}
+
+.profile {
+  text-align: center;
+}
+
+.logout-btn {
+  width: 5%;
+}
+
+.creator {
+  text-align: center;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-right: auto;
+  margin: auto;
+  font-size: 16px;
+  color: white;
+  border-radius: 5px;
+  overflow: visible;
+  box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.2);
+}
+
+table button {
+  width: 200px !important ;
+}
+
+table th,
+table td {
+  text-align: left;
+}
+
+table th {
+  font-weight: bold;
+  color: #777777;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+input {
+  width: 300px;
+  height: 45px;
+  background: #e0dede;
+  background-color: #ffffff0d;
+  padding: 10px;
+  border: none;
+  outline: none;
+  color: white;
+  caret-color: white;
+}
+
+td,
+th {
+  padding: 20px;
+  overflow-wrap: break-word;
+  max-width: 90%;
+}
+
+.TodoName-cell span {
+  padding-left: 10%;
+  width: 100%;
+}
+
+.TodoName-cell {
+  text-align: left;
+  max-width: 700px;
+  overflow: auto;
+  white-space: nowrap;
+}
+
+.TodoProgress {
+  display: table-cell;
+  height: 30px !important;
+  width: 100px;
+  vertical-align: middle;
+  text-align: center;
+  color: white;
+  font-weight: bold;
+  height: 5%;
+  border-radius: 10px;
+}
+
+.header-todo-header-max {
+  table-layout: fixed;
+}
+
+button:active {
+  transform: scale(0.96);
+}
+
+.ll {
+  margin-left: auto;
+  margin-right: auto;
+  width: 50%;
+  height: 10px;
+}
+
+.lla {
+  width: 1px;
+  height: 6px;
+  background: linear-gradient(3deg, red 39px, red 42px);
+  -webkit-transition: width 0.2s;
+  position: absolute;
+}
+
+.lld {
+  width: 50%;
+  height: 6px;
+  background: linear-gradient(3deg, grey 39px, grey 42px);
+  background-color: red;
+  background-position: left top;
+  -webkit-transition: width 0.2s;
+  position: absolute;
+  right: 1;
+}
+
+.ll * {
+  border-radius: 10px;
+}

@@ -1,0 +1,56 @@
+td,
+th {
+  color: white;
+}
+
+table {
+  border-collapse: collapse;
+  width: 40%;
+}
+
+th,
+td {
+  padding: 5px;
+  text-align: center;
+}
+
+.dice-form {
+  padding: 10px;
+  text-align: center;
+}
+
+.dice-form > img {
+  width: 40px;
+  height: 40px;
+  margin: 30px;
+}
+
+td {
+  text-align: center;
+  padding: 10px;
+}
+
+.roll-btn {
+  text-align: center;
+}
+
+.point-unsetted {
+  color: white;
+  cursor: pointer;
+}
+
+.point-setted {
+  color: grey;
+  cursor: unset;
+}
+
+img {
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.game-end {
+  text-align: center;
+  color: white;
+}

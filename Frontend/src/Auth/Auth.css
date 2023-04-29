@@ -1,0 +1,25 @@
+button {
+  width: 200px;
+  height: 40px;
+  color: white;
+  background: #ffffff08;
+  font-size: 1em;
+  font-weight: bold;
+  margin-top: 20px;
+  outline: none;
+  border: none;
+  border-radius: 5px;
+}
+
+span {
+  color: aquamarine;
+}
+
+.login-form {
+  margin: 0;
+  position: absolute;
+  top: 35%;
+  left: 50%;
+  -ms-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+}
