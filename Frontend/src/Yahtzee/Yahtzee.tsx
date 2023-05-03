@@ -14,6 +14,7 @@ import { Base } from "../Shared/Config";
 import { Auth } from "../Auth/Auth";
 import axios from "axios";
 import Cookies from "js-cookie";
+import { useSearchParams } from "react-router-dom";
 
 const hubConnection = new signalR.HubConnectionBuilder()
   .withUrl(Base.BASE_URL + "/services/yahtzeeservice", {
@@ -40,20 +41,22 @@ export const Yahtzee = () => {
   const [rollCount, setRollCount] = useState<number>(2);
   const [gameEnded, setGameEnded] = useState<boolean>(false);
 
+  const [params] = useSearchParams();
+
   const cells: CellPoint[] = [
-    { pointType: PointType.One, name: "Ones" },
-    { pointType: PointType.Two, name: "Twos" },
-    { pointType: PointType.Three, name: "Threes" },
-    { pointType: PointType.Four, name: "Fours" },
-    { pointType: PointType.Five, name: "Fives" },
-    { pointType: PointType.Six, name: "Sixes" },
-    { pointType: PointType.ThreeOfaKind, name: "Three Of a Kind" },
-    { pointType: PointType.FourOfaKind, name: "Four Of a Kind" },
-    { pointType: PointType.SmallStraight, name: "Small Straight" },
-    { pointType: PointType.LargeStraight, name: "Large Straight" },
-    { pointType: PointType.Chance, name: "Chance" },
-    { pointType: PointType.FullHouse, name: "Full House" },
-    { pointType: PointType.Yahtzee, name: "Yahtzee" },
+    { pointType: PointType.One, name: "Ones", description: "Score the sum of all dice showing the number 1." },
+    { pointType: PointType.Two, name: "Twos", description: "Score the sum of all dice showing the number 2." },
+    { pointType: PointType.Three, name: "Threes", description: "Score the sum of all dice showing the number 3." },
+    { pointType: PointType.Four, name: "Fours", description: "Score the sum of all dice showing the number 4." },
+    { pointType: PointType.Five, name: "Fives", description: "Score the sum of all dice showing the number 5." },
+    { pointType: PointType.Six, name: "Sixes", description: "Score the sum of all dice showing the number 6." },
+    { pointType: PointType.ThreeOfaKind, name: "Three Of a Kind", description: "Score the sum of all five dice if at least three of them show the same number." },
+    { pointType: PointType.FourOfaKind, name: "Four Of a Kind", description: "Score the sum of all five dice if at least four of them show the same number." },
+    { pointType: PointType.SmallStraight, name: "Small Straight", description: "Score 30 points if the dice show a sequence of four numbers (for example, 1-2-3-4 or 2-3-4-5)." },
+    { pointType: PointType.LargeStraight, name: "Large Straight", description: "Score 40 points if the dice show a sequence of five numbers (for example, 1-2-3-4-5 or 2-3-4-5-6)." },
+    { pointType: PointType.Chance, name: "Chance", description: "Score the total sum of all five dice, regardless of the combination." },
+    { pointType: PointType.FullHouse, name: "Full House", description: "Score 25 points if three of the dice show one number and the other two dice show another number." },
+    { pointType: PointType.Yahtzee, name: "Yahtzee", description: "Score 50 points if all five dice show the same number." },
   ];
 
   const GetPointsFromType = (playerName: string, pointType: PointType) => {
@@ -111,6 +114,14 @@ export const Yahtzee = () => {
   };
 
   useEffect(() => {
+    const idParm = params.get('id');
+
+    if(idParm !== null){
+      JoinRoom(parseInt(idParm))
+
+      return;
+    }
+
     FetchRooms();
 
     Auth.IsLoggedIn((suc) => {
@@ -120,17 +131,13 @@ export const Yahtzee = () => {
     });
   }, []);
 
-  const SetDices = (dices: Dice[]) => {
-    setDices(dices);
-  };
-
   const OnEndGame = () => {
     setGameEnded(true);
   };
 
   const OnJoin = (data: any) => {
     const cells: PlayerCell[] = [];
-
+    
     for (const player of data.players) {
       const settedPoints: PointCell[] = [];
       for (const settedPoint of player.settedPoints) {
@@ -147,6 +154,7 @@ export const Yahtzee = () => {
     if (data.hasRound) {
       setDices(data.dices);
     }
+
     setRollCount(data.rollCount);
     setGameStarted(data.gameStarted);
     setHasRound(data.hasRound);
@@ -159,6 +167,7 @@ export const Yahtzee = () => {
     if (gameEnded) {
       return;
     }
+
     if (rollCount > 0 && gameStarted) {
       setRollCount(rollCount - 1);
       hubConnection.send("OnRollDices", selectedDices);
@@ -335,6 +344,7 @@ export const Yahtzee = () => {
         const diceElement = document.getElementById(`dice_${i}`);
 
         if (diceElement === null) {
+          console.error('dice Element is null')
           continue;
         }
 
@@ -343,6 +353,7 @@ export const Yahtzee = () => {
         const diceElement = document.getElementById(`dice_${i}`);
 
         if (diceElement === null) {
+          console.error('dice Element is null')
           continue;
         }
 
@@ -355,7 +366,7 @@ export const Yahtzee = () => {
     const cells: PlayerCell[] = [];
     setRollCount(2);
     setSelectedDices([]);
-    SetDices(data.dices);
+    setDices(data.dices);
 
     for (const player of data.players) {
       const settedPoints: PointCell[] = [];
@@ -408,6 +419,7 @@ export const Yahtzee = () => {
     if (!hasRound) {
       return;
     }
+
     const element = document.getElementById(`dice_${dice.index}`);
     if (element === null) return;
 
@@ -415,32 +427,41 @@ export const Yahtzee = () => {
       dice.isSelected = false;
       element.style.border = "";
 
-      const diceArrayIndex = selectedDices.findIndex((x) => x === dice.index);
+      const mSelectedDices = [...selectedDices];
+      const diceArrayIndex = mSelectedDices.indexOf(dice.index, 0)
 
-      const newSelectedArray = [
-        ...selectedDices.slice(0, diceArrayIndex),
-        ...selectedDices.slice(diceArrayIndex + 1),
-      ];
+      mSelectedDices.splice(diceArrayIndex, 1)
 
-      setSelectedDices(newSelectedArray);
+      setSelectedDices(mSelectedDices);
     } else {
       dice.isSelected = true;
       element.style.border = "1px solid red";
 
-      const newSelectedArray = [...selectedDices, dice.index];
-      setSelectedDices(newSelectedArray);
+      const mSelectedDices = [...selectedDices, dice.index];
+
+      setSelectedDices(mSelectedDices);
     }
   };
 
   const JoinRoom = (roomId: number) => {
     hubConnection.start().then(() => {
-      hubConnection.on("SetDices", SetDices);
+      window.history.pushState('', '', '/yahtzee?id='+roomId)
+
+      hubConnection.on("SetDices", setDices);
       hubConnection.on("OnJoin", OnJoin);
       hubConnection.on("OnNextRound", OnNextRound);
       hubConnection.on("OnEndGame", OnEndGame);
 
-      hubConnection.invoke("Join", roomId).then((x) => {
-        setIsPlaying(x);
+      hubConnection.invoke("Join", roomId).then((canJoin) => {
+        if(!canJoin){
+          console.log(canJoin)
+          FetchRooms();
+          hubConnection.stop();
+        }
+        else{
+          console.log(canJoin)
+          setIsPlaying(canJoin);
+        }
       });
     });
   };
@@ -531,7 +552,7 @@ export const Yahtzee = () => {
           </tr>
           {cells.map((x, index) => {
             return (
-              <tr key={`cell ${index}`}>
+              <tr title={x.description} key={`cell ${index}`}>
                 <td>{x.name}</td>
                 {pointCells.map((cell, index) => {
                   return (

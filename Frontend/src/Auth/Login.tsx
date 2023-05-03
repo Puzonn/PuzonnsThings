@@ -16,7 +16,7 @@ export const Login = () => {
     if (searchParams.get("redirectFrom") != null) {
       setInfo("Your account has been created. \n You can now Log in");
     }
-  });
+  }, []);
 
   const HandleLoginFormSubmit = (event: any) => {
     event.preventDefault();
@@ -43,8 +43,14 @@ export const Login = () => {
           window.location.href = "/todo";
         }
       })
-      .catch((x) => {
-        setError("Wrong credentials");
+      .catch((x) => 
+      {
+        if(x.code === 'ERR_NETWORK'){
+          setError("No connection to server");
+        }
+        else{
+          setError(x.response.data);
+        }
       });
   };
 

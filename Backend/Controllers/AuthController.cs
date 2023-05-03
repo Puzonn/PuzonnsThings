@@ -52,7 +52,7 @@ public class AuthController : ControllerBase
 
         if (user is null)
         {
-            return BadRequest("Wrong login validation");
+            return BadRequest("User dose not exist");
         }
 
         if (!VerifyPassword(login.Password, user.Password))

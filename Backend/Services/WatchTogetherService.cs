@@ -30,7 +30,7 @@ public class WatchTogetherService
 
     public void AddCachedRoom(WatchTogetherConnectionRoomCache room)
     {
-        cachedRooms.Add(int.Parse(room.GroupName), room);
+        cachedRooms.Add(room.GroupId, room);
     }
 
     public void UpdateConnectionId(int roomId, string connectionId)

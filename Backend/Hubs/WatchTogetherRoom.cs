@@ -83,7 +83,7 @@ public class WatchTogetherRoom : Hub
             return;
         }
 
-        await Clients.Group(room.GroupName.ToString()).SendAsync("ChangeState", model);
+        await Clients.Group(room.GroupId.ToString()).SendAsync("ChangeState", model);
     }
 
     public override Task OnDisconnectedAsync(Exception? exception)

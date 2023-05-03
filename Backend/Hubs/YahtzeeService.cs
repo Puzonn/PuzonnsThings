@@ -7,6 +7,7 @@ using PuzonnsThings.Models.Yahtzee;
 using PuzonnsThings.Databases;
 using PuzonnsThings.Models;
 using TodoApp.Repositories;
+using PuzonnsThings.Models.WatchTogether;
 
 namespace PuzonnsThings.Hubs;
 
@@ -29,14 +30,21 @@ public class YahtzeeService : Hub
     {
         User? user = await GetUser();
 
-        if(user is null)
+        if (user is null)
         {
             return;
         }
 
         YahtzeePlayer player = users[user.Id];
 
-        YahtzeeLobby lobby = rooms[player.LobbyId];
+        rooms.TryGetValue(player.LobbyId, out YahtzeeLobby? lobby);
+
+        if (lobby is null)
+        {
+            Context.Abort();
+
+            return;
+        }
 
         lobby.Players.Remove(player);
 
@@ -197,6 +205,19 @@ public class YahtzeeService : Hub
         await base.OnConnectedAsync();
     }
 
+    private async Task DeleteRoom(int roomId)
+    {
+        YahtzeeRoomModel? room = _context.YahtzeeRooms.Where(x => x.Id == roomId).FirstOrDefault();
+
+        if (room is null)
+        {
+            return;
+        }
+
+        _context.YahtzeeRooms.Remove(room);
+        await _context.SaveChangesAsync();
+    }
+
     public async Task OnRollDices(int[] dices)
     {
         User? user = await GetUser();
@@ -261,8 +282,7 @@ public class YahtzeeService : Hub
         users.Remove(player.UserId);
         rooms.Remove(player.LobbyId);
 
-        _context.YahtzeeRooms.Remove(_context.YahtzeeRooms.Where(x => x.Id == player.LobbyId).First());
-        await _context.SaveChangesAsync();
+        await DeleteRoom(player.LobbyId);
     }
 
     public async Task<YahtzeeOnPointSetModel> OnPointSet(YahtzeePointType pointType)

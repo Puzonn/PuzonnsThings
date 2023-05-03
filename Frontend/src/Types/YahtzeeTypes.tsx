@@ -24,6 +24,7 @@ export enum PointType {
 export interface CellPoint {
   pointType: PointType;
   name: string;
+  description: string;
 }
 
 export interface RoomModel {
