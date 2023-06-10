@@ -4,8 +4,8 @@ namespace TodoApp.Repositories;
 
 public interface IUserRepository
 {
-    Task<User?> GetByIdAsync(int id);
-    Task CreateUserAsync(User user);
-    Task UpdateUserAsync(User user);
-    Task DeleteUserAsync(int id);
+    public Task<User?> GetByIdAsync(int id);
+    public Task CreateUserAsync(User user);
+    public Task UpdateUserAsync(User user);
+    public Task DeleteUserAsync(int id);
 }

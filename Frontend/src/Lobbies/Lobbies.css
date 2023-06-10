@@ -1,0 +1,77 @@
+#lobbies table {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#lobbies tbody tr > td {
+  padding: 20px
+}
+
+#lobbies-selector {
+  width: 100vw;
+}
+
+#lobbies-selector {
+  max-width: 500px;
+  padding: 20px;
+}
+
+.lobby-container_name {
+  width: 220px;
+  overflow: hidden;
+}
+
+#lobbies-create_lobby-btn {
+  background-color: #275a28;
+  width: 200px;
+  height: 40px;
+  font-size: 1em;
+  font-weight: bold;
+  margin-top: 20px;
+  outline: none;
+  border: none;
+  border-radius: 5px;
+  font-size: 17px;
+  font-family: "Source Sans Pro", sans-serif;
+}
+
+#lobbies-selector option {
+  color: black;
+}
+
+.lobby-container ul {
+  text-align: center;
+}
+
+.lobby-type {
+  display: inline-block;
+  border-radius: 10px;
+  padding: 10px;
+  font-weight: bold;
+  text-transform: uppercase;
+  background-color: #ffffff10;
+}
+
+.lobby-type span {
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.lobby-container {
+  font-size: small;
+  width: 50vw;
+  height: 70px;
+  background-color: #ffffff10;
+  border-radius: 10px;
+}
+
+#lobbies-selector select {
+  text-align: center;
+  height: 35px;
+  color: white;
+  background-color: #ffffff08;
+  padding: 10px;
+  border: none;
+  outline: none;
+  width: 200px;
+}

@@ -1,5 +1,9 @@
-export class Base
+export class Config 
 {
-    //static readonly BASE_URL = "https://puzonnsthings.pl"
-     static readonly BASE_URL = "http://localhost:5248"
+    static GetApiUrl(){
+        if(process.env.NODE_ENV === 'development') {
+            return process.env.REACT_APP_DEV_API_URL;
+        }
+        return process.env.REACT_APP_API_URL;
+    }
 }

@@ -1,6 +1,6 @@
 import axios from "axios";
 import Cookies from "js-cookie";
-import { Base } from "../Shared/Config";
+import { Config } from "../Shared/Config";
 
 export class Auth
 {
@@ -9,11 +9,11 @@ export class Auth
 
   static IsLoggedIn(callback: (isValid:boolean, tokenId: string) => void) {
     const authCookie = this.GetAuthorizationHeader();
-    if(typeof authCookie === 'undefined'){
+    if(typeof authCookie === 'undefined' || authCookie === 'Bearer undefined'){
       return callback(false, '');
     }
-
-    axios.get(Base.BASE_URL+"/api/auth/validate", 
+    
+    axios.get(Config.GetApiUrl()+"/api/auth/validate", 
     {
       headers:{'Authorization': this.GetAuthorizationHeader()}
     }).then(response => 

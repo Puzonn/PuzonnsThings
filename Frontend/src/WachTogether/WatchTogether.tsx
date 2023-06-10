@@ -5,10 +5,10 @@ import { Auth } from "../Auth/Auth";
 import { Room, RoomSync } from "../Types/WatchTogetherTypes";
 import * as signalR from "@microsoft/signalr";
 import YoutubeIFrame from "./YoutubeIFrame";
-import { Base } from "../Shared/Config";
+import { Config } from "../Shared/Config";
 
 const hubConnection = new signalR.HubConnectionBuilder()
-  .withUrl(Base.BASE_URL+"/services/watchtogether", {
+  .withUrl(Config.GetApiUrl()+"/services/watchtogether", {
     accessTokenFactory: () => Auth.GetAuthorizationToken(),
   })
   .build();
@@ -20,7 +20,7 @@ export const WatchTogether = () => {
   const [roomInfo, setRoomInfo] = useState<Room>();
   const [isPlayerVisible, setPlayerVisibility] = useState<boolean>();
   const [urlInput, setUrlInput] = useState<string>();
-  const [rooms, setRooms] = useState<Room[]>();
+  const [rooms, setRooms] = useState<Room[]>([]);
   const [isLoggedIn, setLoggedIn] = useState<boolean>(false);
   const [isCreator, setCreator] = useState<boolean>(false);
 
@@ -109,7 +109,7 @@ export const WatchTogether = () => {
 
     axios
       .post(
-        Base.BASE_URL+"/api/WatchTogether/create",
+        Config.GetApiUrl()+"/api/WatchTogether/create",
         JSON.stringify(createModel),
         {
           headers: {
@@ -123,7 +123,7 @@ export const WatchTogether = () => {
 
   const FetchRooms = () => {
     axios
-      .get(Base.BASE_URL+"/api/watchtogether/fetch", {
+      .get(Config.GetApiUrl()+"/api/watchtogether/fetch", {
         headers: {
           "Content-Type": "application/json",
           Authorization: Auth.GetAuthorizationHeader(),
@@ -168,7 +168,7 @@ export const WatchTogether = () => {
 
   const JoinRoom = (roomId: number) => {
     axios
-      .post(Base.BASE_URL+"/api/watchtogether/join?id=" + roomId, null, {
+      .post(Config.GetApiUrl()+"/api/watchtogether/join?id=" + roomId, null, {
         headers: {
           Authorization: Auth.GetAuthorizationHeader(),
         },
@@ -176,7 +176,7 @@ export const WatchTogether = () => {
       .then((response) => {
         if (response.status === 200) {
           axios
-            .get(Base.BASE_URL+"/api/watchtogether/get?id=" + roomId, {
+            .get(Config.GetApiUrl()+"/api/watchtogether/get?id=" + roomId, {
               headers: {
                 "Content-Type": "application/json",
                 Authorization: Auth.GetAuthorizationHeader(),
@@ -236,13 +236,13 @@ export const WatchTogether = () => {
 
   const ChangeVideoPauseState = () => {
     if (!player.isInitialized) {
-      SendState("PauseSync", `${false}`);
+      SendState("PauseSync", `false`);
       return;
     }
     if (player.isPaused) {
-      SendState("PauseSync", `${false}`);
+      SendState("PauseSync", `false`);
     } else {
-      SendState("PauseSync", `${true}`);
+      SendState("PauseSync", `false`);
     }
   };
 
@@ -277,7 +277,7 @@ export const WatchTogether = () => {
               <th>Watchers Count</th>
               <th>Actions</th>
             </tr>
-            {rooms?.map((room, index) => {
+            {rooms.map((room, index) => {
               return (
                 <tr key={"room_" + index}>
                   <td>{room.RoomId}</td>

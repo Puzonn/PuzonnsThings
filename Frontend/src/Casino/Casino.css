@@ -1,0 +1,191 @@
+#container {
+  text-align: center;
+}
+
+#ss {
+  width: 550px;
+  height: 550px;
+  border-radius: 90%;
+  position: relative;
+  overflow: hidden;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, 0%);
+}
+
+.ss-bets-count {
+  float: left;
+  padding: 5px;
+  color: #808080;
+}
+
+.ss-bets-user {
+  max-width: 200px;
+}
+
+#ss-cash-input {
+  width: 150px;
+  border-radius: 8px;
+}
+
+#ss-bet-input {
+  display: inline-block;
+  padding: 0px;
+}
+
+#ss-bet-input li {
+  float: left;
+}
+
+#ss-bet-input li:not(:first-child) {
+  float: left;
+}
+
+#ss-input input {
+  transform: translateY(-15%);
+}
+
+#ss-bet-input li {
+  width: 80px;
+  list-style-type: none;
+  float: left;
+  display: block;
+}
+
+#ss-point {
+  z-index: 1;
+  position: absolute;
+  top: 80%;
+  left: 50%;
+  transform: translate(-50%, 0%);
+  padding: 0px;
+  margin: 0px;
+  width: 50px;
+  height: 200px;
+  background-color: black;
+  clip-path: polygon(100% 0, 0 0, 50% 30%);
+}
+
+#ss-container {
+  z-index: 1;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
+.ss-sector {
+  width: 50%;
+  height: 50%;
+  position: absolute;
+  background-color: black;
+  transform-origin: bottom right;
+  clip-path: polygon(73% 0, 100% 0, 100% 7%, 75% 10%);
+}
+
+#ss-input {
+  padding-top: 30px;
+}
+
+#ss-bet-input li {
+  cursor: pointer;
+  user-select: none;
+}
+
+#ss-options {
+  padding: 50px;
+  list-style: none;
+  display: inline-block;
+}
+
+#ss-modal-roll_info-win {
+  color: #32cd32;
+  text-align: center;
+}
+
+#ss-modal ul {
+  list-style-type: none;
+}
+
+#ss-modal {
+  z-index: 100;
+  position: absolute;
+  top: 30%;
+  left: 40%;
+  animation: ss-modal-animation 0.4s ease-in-out;
+}
+
+@keyframes ss-modal-animation {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+#ss-modal-roll_info-info {
+  border: 2px solid#808080;
+  border-radius: 10px;
+  text-align: center;
+}
+
+#ss-modal-roll_info-container h3 {
+  color: #32cd32;
+}
+
+#ss-modal-roll_info-container {
+  width: 250px;
+  height: 200px;
+}
+
+#ss-timer span {
+  overflow: visible;
+  position: absolute;
+  color: white;
+  width: 100%;
+  height: 200%;
+  top: 50%;
+  left: 0%;
+  font-size: xx-large;
+}
+
+.ss-bets {
+  max-height: 300px;
+  width: 100%;
+  margin: 0px;
+  padding: 0px;
+  overflow-y: scroll;
+}
+
+.ss-bets::-webkit-scrollbar {
+  display: none;
+}
+
+#ss-bets li {
+  list-style: none;
+}
+
+#ss-options li {
+  width: 220px;
+  float: left;
+}
+
+#ss-options li:not(:last-child) {
+  margin-right: 10px;
+}
+
+#ss-options span {
+  display: block;
+  color: white;
+  text-align: center;
+  padding: 16px;
+  text-decoration: none;
+}
+
+.ss-options-selected {
+  font-weight: 600;
+}
+
+#ss-options span:hover {
+  cursor: pointer;
+}

@@ -1,35 +1,246 @@
-span {
+span,
+a {
   color: white;
 }
 
-img {
-  width: 30px;
-  height: 30px;
-  cursor: pointer;
+#todo-container {
+  display: flex;
+  flex-wrap: wrap;
 }
 
-.App > * {
-  padding: 20px;
+#todo-creator input,
+select {
+  border-radius: 10px;
 }
 
-th {
-  font-size: 20px;
+#todo-creator option {
+  background-color: #000000a1;
 }
 
-.todo-title {
-  max-width: 20vw;
-}
-
-.TodoProgress {
-  cursor: pointer;
-  -webkit-touch-callout: none;
-  -webkit-user-select: none;
-  -khtml-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-}
-
-tbody {
+#todo-creator select {
+  height: 45px;
+  color: white;
   background-color: #ffffff0d;
+  padding: 10px;
+  border: none;
+  outline: none;
+}
+
+.todo-helper {
+  text-align: center;
+}
+
+#todo-creator {
+  position: relative;
+  width: 450px;
+}
+
+#todo-creator > input {
+  margin: 10px;
+}
+
+#todo-creator input,
+select {
+  width: 100%;
+  display: block;
+}
+
+@media only screen and (min-device-width: 640px) {
+  .todo-helper {
+    flex: 5%;
+    height: 90vh;
+    padding: 10px;
+    float: left;
+  }
+
+  .todo-helper input {
+    width: 100%;
+    height: 35px;
+    border-radius: 10px;
+    height: 35px;
+  }
+
+  #todo-list {
+    text-align: start !important;
+  }
+}
+
+#todo-list {
+  flex: 60%;
+}
+
+@media only screen and (max-device-width: 640px) {
+  .todo-helper {
+    width: 100%;
+    height: 100%;
+  }
+
+  .todo-helper li,
+  ul,
+  a {
+    width: 100%;
+  }
+
+  .todo-helper input {
+    height: 35px;
+    border-radius: 10px;
+    height: 35px;
+  }
+
+  #todo-creator {
+    display: none;
+  }
+}
+
+.todo-helper li {
+  position: relative;
+}
+
+.todo-helper li:hover::after {
+  transform: scaleX(1);
+  transform-origin: center;
+}
+
+.task-container:not(.task-container.task-container-selected):hover {
+  transform: translate(1%);
+  transition: transform 0.2s;
+}
+
+.task-container-selected {
+  transform: translate(1%);
+}
+
+.task-container {
+  cursor: pointer;
+  margin-right: 2px;
+  transition: margin 0.2s ease-in-out;
+  transition: transform 0.2s;
+}
+
+#todo-list ul {
+  list-style-type: none;
+}
+
+.todo-helper li::after {
+  position: absolute;
+  content: "";
+  top: 100%;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: white;
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform 0.5s;
+}
+
+.todo-helper .todo-helper-selected::after {
+  position: absolute;
+  content: "";
+  top: 100%;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: white;
+  transform: scaleX(1);
+  transform-origin: center;
+  transition: transform 0.3s;
+}
+
+.todo-helper li {
+  padding: 5px;
+  font-size: large;
+  cursor: pointer;
+}
+
+#todos-list .todo-list-container {
+  padding: 20px;
+  width: 70%;
+  height: 100%;
+}
+
+#todo-list {
+  padding: 8px;
+  max-height: 90vh;
+  overflow-x: hidden;
+  overflow-y: auto;
+  position: relative;
+}
+
+#todo-list li {
+  padding: 10px;
+}
+
+.task-name {
+  font-size: larger;
+  font-weight: bold;
+}
+
+.task-date {
+  font-size: small;
+}
+
+.tasks-empty {
+  text-align: center;
+}
+
+.task-progress {
+  position: absolute;
+  width: 1px;
+  height: 40px;
+  margin-top: 18px;
+  margin-left: 0px;
+}
+
+.task-priority {
+  font-size: small;
+}
+
+.todo-creator-update-buttons {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+}
+
+.todo-creator-update-buttons button {
+  margin: 10px;
+}
+
+.todo-creator_selector {
+  font-size: 0.7vw;
+  display: flex;
+  justify-content: space-between;
+}
+
+.todo-creator_selector > div {
+  border-radius: 6px;
+  border-radius: 10px;
+  background-color: #ffffff0d;
+  max-width: 70%;
+  height: 45px;
+  padding: 1em;
+  margin-top: 10px;
+  margin-bottom: 0.4em;
+  white-space: nowrap;
+}
+
+.todo-creator_selector span {
+  margin: 0 auto;
+  text-align: center;
+}
+
+#todo-creator-date_picker {
+  display: inline-block;
+}
+
+#todo-creator-close_icon {
+  width: 30px;
+  position: absolute;
+  top: 2%;
+  left: 91%;
+  cursor: pointer;
+}
+
+#todo-creator-close_icon:active {
+  transform: scale(0.96);
 }

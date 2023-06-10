@@ -1,0 +1,40 @@
+#cai-display_email-button {
+  width: 150px;
+  font-size: medium;
+  border-radius: 50px;
+  font-weight: 600;
+}
+
+#cai {
+  padding-left: 20px;
+}
+
+#cai-informations label {
+  color: #aaaaaa;
+}
+
+#cai-about {
+  padding-top: 50px;
+  max-width: 60vw;
+}
+
+#cai-content {
+  padding-top: 50px;
+}
+
+#cai-content ul {
+  padding-left: 35px;
+}
+
+#cai-content > div:not(:first-child) {
+  padding-top: 20px;
+}
+
+#cai-content ul,
+li {
+  list-style: initial;
+}
+
+#cai-main p {
+  padding-left: 20px;
+}

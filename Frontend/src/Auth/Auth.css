@@ -11,15 +11,21 @@ button {
   border-radius: 5px;
 }
 
-span {
-  color: aquamarine;
+#login-form h2 {
+  font-size: 2rem;
 }
 
-.login-form {
-  margin: 0;
-  position: absolute;
-  top: 35%;
-  left: 50%;
-  -ms-transform: translate(-50%, -50%);
-  transform: translate(-50%, -50%);
+#login-container {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+@media (max-width: 767px) {
+  #login-container  {
+    display: block;
+    text-align: center;
+  }
 }

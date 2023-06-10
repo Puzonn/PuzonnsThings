@@ -1,234 +1,189 @@
 import axios from "axios";
-import { useEffect, useReducer, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Auth } from "../Auth/Auth";
-import { Progression, TodoModel } from "../Types/TodoTypes"
-import './Todo.css'
-import { Base } from "../Shared/Config";
+import {
+  Progression,
+  TaskModel,
+  TaskSearchOptionType,
+  ParseTask,
+  GetMeridian,
+} from "../Types/TodoTypes";
+import "./Todo.css";
+import { Config } from "../Shared/Config";
+import { TodoSearchPanel } from "./TodoSearchPanel";
+import { TodoTaskList } from "./TodoTaskList";
+import { TodoCreator } from "./TodoCreator";
+import { AuthContext } from "../Shared/AuthContext";
 
-function Todo() {
+const Todo = () => {
+  const { isLoggedIn, isFetched } = useContext(AuthContext);
+
   const [inputValue, setInputValue] = useState<string>("");
-  const [todos, setTodos] = useState<TodoModel[]>([]);
-  const [todoUpdated, updateTodo] = useReducer((x) => x + 1, 0);
-  const [completedCount, setCompletedCount] = useState<number>(0);
+  const [fetchedTasks, setFetchedTasks] = useState<TaskModel[]>([]);
+  const [screenWidth, setScreenWidth] = useState<number>(window.innerWidth);
+  const [showMenuIcon, setShowMenuIcon] = useState<boolean>(false);
+  const [searchOptionsSelected, setSearchOptionsSelected] =
+    useState<TaskSearchOptionType>(TaskSearchOptionType.ByDate);
+  const [selectedTask, setSelectedTask] = useState<TaskModel | undefined>();
 
-  const GetProgressId = (progress: Progression) => {
-    return Object.values(Progression).findIndex((x) => x === progress);
-  };
+  const [areTasksFetched, setTasksFetched] = useState<boolean>(false);
+  const [showCreator, setShowCreator] = useState<boolean>(true);
 
-  const GetProgressName = (progressId: number) => {
-    return Object.values(Progression)[progressId];
-  };
-
-  const GetProgressByIndex = (progressId: number) => {
-    return Object.keys(Progression)[progressId] as Progression;
-  };
-
-  const OnInputChange = (value: any) => {
-    setInputValue(value.target.value);
-  };
-
-  const OnInputEnter = (event: any) => {
-    if (event.key === "Enter") {
-      if (inputValue !== undefined && inputValue.length > 0) {
-        const todosArr = todos.slice();
-        if (todosArr.find((x) => x.Name === inputValue)) {
-          return;
-        }
-
-        setInputValue("");
-
-        const actualDate = new Date();
-        const newTodo: TodoModel = {
-          Id: todosArr.length,
-          Name: inputValue,
-          ProgressId: GetProgressId(Progression.InProgress),
-          Date:
-            actualDate.getDay() +
-            "/" +
-            actualDate.getMonth() +
-            "/" +
-            actualDate.getFullYear(),
-        };
-        PostTodo(newTodo);
-      }
-    }
-  };
-
-  const AddTodo = (todo: TodoModel) => {
-    setTodos([...todos, todo]);
-  };
+  const IsMobile = screenWidth <= 768;
+  const MobileShowMenu = IsMobile && showMenuIcon;
+  const ShouldShowMenu = MobileShowMenu || !IsMobile;
 
   useEffect(() => {
-    const completedCount = todos.filter(
-      (x) => x.ProgressId === GetProgressId(Progression.Done)
+    window.addEventListener(
+      "resize",
+      (event) => {
+        setScreenWidth(window.innerWidth);
+      },
+      true
     );
-    setCompletedCount(completedCount.length);
-  }, [todos, todoUpdated]);
-
-  useEffect(() => {
-    Auth.IsLoggedIn((response) => {
-      if (!response) {
-        console.log(response +" response from auth")
-        window.location.href = "/login";
-      } else {
-        FetchTodoList();
-      }
-    });
   }, []);
 
-  const HandleDelete = (todo: TodoModel) => {
-    axios
-      .delete(Base.BASE_URL+"/api/todo/delete", {
-        data: { id: todo.Id },
-        headers: 
-        {
-          "Content-Type": "application/json",
-          "Authorization": Auth.GetAuthorizationHeader()
-        },
-      })
-      .then((response) => console.log(response));
-
-    const todoArr = todos.slice();
-    const todoIndex: number = todoArr.findIndex((x) => x.Id === todo.Id);
-    todoArr.splice(todoIndex, 1);
-    setTodos(todoArr);
-  };
-
-  const GetProgressColor = (progress: Progression): string => {
-    if (progress === Progression.Done) {
-      return "#00ff73";
-    } else if (progress === Progression.InProgress) {
-      return "#FF4500";
-    } else {
-      return "#dc143c";
+  useEffect(() => {
+    if (isLoggedIn && isFetched) {
+      FetchTodoList();
+    } else if (!isLoggedIn && isFetched) {
+      window.location.href = "/login";
     }
-  };
+  }, [isLoggedIn, isFetched]);
 
-  const PostTodo = (todo: TodoModel) => {
-    axios
-      .post(Base.BASE_URL+"/api/todo/create", JSON.stringify(todo), {
-        headers: 
-        {
-          "Content-Type": "application/json",
-          "Authorization": Auth.GetAuthorizationHeader()
-        },
-      })
-      .then((response) => {
-        AddTodo(response.data);
-      });
-  };
-
-  const HandleProgressClicked = (todo: TodoModel) => {
-    if (todo.ProgressId === GetProgressId(Progression.InProgress)) {
-      todo.ProgressId = GetProgressId(Progression.Done);
-    } else if (todo.ProgressId === GetProgressId(Progression.Done)) {
-      todo.ProgressId = GetProgressId(Progression.InProgress);
+  useEffect(() => {
+    if (selectedTask !== undefined) {
+      setShowCreator(false);
     }
+  }, [selectedTask]);
 
-    const todoUpdateMode = {
-      TodoId: todo.Id,
-      ProgressId: todo.ProgressId,
+  useEffect(() => {
+    const taskArr = fetchedTasks.slice();
+    const sorted: TaskModel[] = [];
+
+    const groupedTasks: { [key in Progression]: TaskModel[] } = {
+      [Progression.Completed]: [],
+      [Progression.InHold]: [],
+      [Progression.Uncompleted]: [],
     };
 
-    axios.put(
-      Base.BASE_URL+"/api/todo/update",
-      JSON.stringify(todoUpdateMode),
-      {
-        headers: 
-        {
-          "Content-Type": "application/json",
-          "Authorization": Auth.GetAuthorizationHeader()
-        },
+    for (const task of fetchedTasks) {
+      groupedTasks[task.ProgressId as Progression].push(task);
+    }
+
+    if (searchOptionsSelected === TaskSearchOptionType.ByDate) {
+      taskArr.sort((a: TaskModel, b: TaskModel) => {
+        a.Renderable = true;
+        b.Renderable = true;
+        return a.DateTime.getTime() - b.DateTime.getTime();
+      });
+
+      setFetchedTasks(taskArr);
+
+      return;
+    }
+
+    if (searchOptionsSelected === TaskSearchOptionType.Today) {
+      const now = new Date();
+
+      for (const task of taskArr) {
+        if (task.DateTime.getDate() !== now.getDate()) {
+          task.Renderable = false;
+        }
       }
-    );
 
-    updateTodo();
-  };
+      setFetchedTasks(taskArr);
 
-  const HandleLogout = () => {
-    axios.post(Base.BASE_URL+"/api/auth/logout").then((x) => {
-      window.location.href = "/login";
-    });
-  };
+      return;
+    }
+
+    if (
+      searchOptionsSelected === TaskSearchOptionType.Completed ||
+      searchOptionsSelected === TaskSearchOptionType.Uncompleted ||
+      searchOptionsSelected === TaskSearchOptionType.InHold
+    ) {
+      let progressionOption: Progression;
+
+      if (searchOptionsSelected === TaskSearchOptionType.Completed) {
+        progressionOption = Progression.Completed;
+      } else if (searchOptionsSelected === TaskSearchOptionType.Uncompleted) {
+        progressionOption = Progression.Uncompleted;
+      } else {
+        progressionOption = Progression.InHold;
+      }
+
+      for (const key of Object.keys(groupedTasks)) {
+        const intKey = parseInt(key);
+        for (const task of groupedTasks[intKey as Progression]) {
+          task.Renderable = true;
+          if (progressionOption === task.ProgressId) {
+            sorted.unshift(task);
+          } else {
+            sorted.push(task);
+          }
+        }
+      }
+    }
+
+    setFetchedTasks(sorted);
+  }, [searchOptionsSelected]);
 
   const FetchTodoList = () => {
     axios
-      .get(Base.BASE_URL+"/api/todo/fetch", {
-        headers: 
-        {
+      .get(Config.GetApiUrl() + "/api/todo/fetch", {
+        headers: {
           "Content-Type": "application/json",
-          "Authorization": Auth.GetAuthorizationHeader()
+          Authorization: Auth.GetAuthorizationHeader(),
         },
       })
-      .then((response) => setTodos(response.data));
+      .then((response) => {
+        const tasks = response.data;
+        const taskArr: TaskModel[] = [];
+
+        for (let task of tasks) {
+          taskArr.push(ParseTask(task));
+        }
+
+        setFetchedTasks(taskArr);
+        setTasksFetched(true);
+      });
+  };
+
+  const HandleTaskClick = (task: TaskModel | undefined) => {
+    if (typeof selectedTask !== "undefined") {
+      selectedTask.Selected = false;
+    }
+
+    if (typeof task !== "undefined") {
+      task.Selected = true;
+    }
+
+    setSelectedTask(task);
   };
 
   return (
-    <div className="App">
-      <div className="creator">
-        <h2>Todos ({todos.length})</h2>
-        <input
-          placeholder="What's your next step?"
-          onKeyDown={OnInputEnter}
-          onChange={OnInputChange}
-          id="todo-input"
-          type="text"
-          value={inputValue}
-        ></input>
-        <h2>Completed: {completedCount}</h2>
-      </div>
-      {
-        <div className="todos">
-          <table>
-            <tbody>
-              <tr>
-                <th>Title</th>
-                <th className="header-todo-header-max">Date</th>
-                <th className="header-todo-header-max">Progress</th>
-                <th></th>
-              </tr>
-              {todos.map((todo, index) => {
-                return (
-                  <tr key={"todo_" + index}>
-                    <td>
-                      <div className="todo-title">
-                        <span>{todo.Name}</span>
-                      </div>
-                    </td>
-                    <td className="header-todo-header-max">
-                      <div>
-                        <span>{todo.Date}</span>
-                      </div>
-                    </td>
-                    <td className="header-todo-header-max">
-                      <div
-                        onClick={() => HandleProgressClicked(todo)}
-                        style={{
-                          backgroundColor: GetProgressColor(
-                            GetProgressByIndex(todo.ProgressId)
-                          ),
-                        }}
-                        className="TodoProgress"
-                      >
-                        {GetProgressName(todo.ProgressId)}
-                      </div>
-                    </td>
-                    <th>
-                      <img
-                        alt="delete"
-                        onClick={() => HandleDelete(todo)}
-                        src={require("./delete.png")}
-                      ></img>
-                    </th>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      }
+    <div id="todo-container">
+      <TodoSearchPanel
+        ShouldShowMenu={ShouldShowMenu}
+        IsMobile={IsMobile}
+        SearchOptionsSelected={searchOptionsSelected}
+        SetSearchOption={setSearchOptionsSelected}
+      />
+      <TodoTaskList
+        Tasks={fetchedTasks}
+        IsFetched={isFetched}
+        OnTaskClicked={HandleTaskClick}
+      />
+      <TodoCreator
+        Tasks={fetchedTasks}
+        SelectedTask={selectedTask}
+        SetSelectedTask={setSelectedTask}
+        ShowCreator={showCreator}
+        SetTasks={setFetchedTasks}
+        SetShowCreator={setShowCreator}
+      />
     </div>
   );
-}
+};
 
 export default Todo;

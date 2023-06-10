@@ -1,8 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Backend.Models.Lobbies;
+using Microsoft.EntityFrameworkCore;
 using PuzonnsThings.Models;
 using PuzonnsThings.Models.Todo;
-using PuzonnsThings.Models.WatchTogether;
-using PuzonnsThings.Models.Yahtzee;
 
 namespace PuzonnsThings.Databases;
 
@@ -19,7 +18,6 @@ public class DatabaseContext : DbContext
     }
 
     public DbSet<User> Users => Set<User>();
-    public DbSet<TodoModel> TodoList => Set<TodoModel>();
-    public DbSet<WatchTogetherRoomModel> WatchTogetherRooms => Set<WatchTogetherRoomModel>();
-    public DbSet<YahtzeeRoomModel> YahtzeeRooms => Set<YahtzeeRoomModel>();
+    public DbSet<TaskModel> TodoList => Set<TaskModel>();
+    public DbSet<LobbyModel> Lobbies => Set<LobbyModel>();
 }

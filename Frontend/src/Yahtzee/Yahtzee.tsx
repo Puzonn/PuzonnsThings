@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import "./Yahtzee.css";
 import {
   Dice,
@@ -8,24 +8,25 @@ import {
   Player,
   PlayerCell,
   PointCell,
+  Endgame,
 } from "../Types/YahtzeeTypes";
 import * as signalR from "@microsoft/signalr";
-import { Base } from "../Shared/Config";
+import { Config } from "../Shared/Config";
 import { Auth } from "../Auth/Auth";
-import axios from "axios";
-import Cookies from "js-cookie";
 import { useSearchParams } from "react-router-dom";
+import { UserContext } from "../Shared/UserContext";
 
 const hubConnection = new signalR.HubConnectionBuilder()
-  .withUrl(Base.BASE_URL + "/services/yahtzeeservice", {
+  .withUrl(Config.GetApiUrl() + "/services/yahtzeeservice", {
     accessTokenFactory: () => Auth.GetAuthorizationToken(),
   })
   .build();
 
 export const Yahtzee = () => {
-  const cachedUsername = Cookies.get("Username");
-  const CurrentPlayerName = cachedUsername
-    ? cachedUsername
+  const user = useContext(UserContext);
+
+  const CurrentPlayerName = user.Username
+    ? user.Username
     : "<undefined username>";
 
   const [dices, setDices] = useState<Dice[]>([]);
@@ -40,23 +41,81 @@ export const Yahtzee = () => {
   const [players, setPlayers] = useState<Player[]>([]);
   const [rollCount, setRollCount] = useState<number>(2);
   const [gameEnded, setGameEnded] = useState<boolean>(false);
-
+  const [endgameScreen, setEndgameScreen] = useState<Endgame>();
   const [params] = useSearchParams();
 
   const cells: CellPoint[] = [
-    { pointType: PointType.One, name: "Ones", description: "Score the sum of all dice showing the number 1." },
-    { pointType: PointType.Two, name: "Twos", description: "Score the sum of all dice showing the number 2." },
-    { pointType: PointType.Three, name: "Threes", description: "Score the sum of all dice showing the number 3." },
-    { pointType: PointType.Four, name: "Fours", description: "Score the sum of all dice showing the number 4." },
-    { pointType: PointType.Five, name: "Fives", description: "Score the sum of all dice showing the number 5." },
-    { pointType: PointType.Six, name: "Sixes", description: "Score the sum of all dice showing the number 6." },
-    { pointType: PointType.ThreeOfaKind, name: "Three Of a Kind", description: "Score the sum of all five dice if at least three of them show the same number." },
-    { pointType: PointType.FourOfaKind, name: "Four Of a Kind", description: "Score the sum of all five dice if at least four of them show the same number." },
-    { pointType: PointType.SmallStraight, name: "Small Straight", description: "Score 30 points if the dice show a sequence of four numbers (for example, 1-2-3-4 or 2-3-4-5)." },
-    { pointType: PointType.LargeStraight, name: "Large Straight", description: "Score 40 points if the dice show a sequence of five numbers (for example, 1-2-3-4-5 or 2-3-4-5-6)." },
-    { pointType: PointType.Chance, name: "Chance", description: "Score the total sum of all five dice, regardless of the combination." },
-    { pointType: PointType.FullHouse, name: "Full House", description: "Score 25 points if three of the dice show one number and the other two dice show another number." },
-    { pointType: PointType.Yahtzee, name: "Yahtzee", description: "Score 50 points if all five dice show the same number." },
+    {
+      pointType: PointType.One,
+      name: "Ones",
+      description: "Score the sum of all dice showing the number 1.",
+    },
+    {
+      pointType: PointType.Two,
+      name: "Twos",
+      description: "Score the sum of all dice showing the number 2.",
+    },
+    {
+      pointType: PointType.Three,
+      name: "Threes",
+      description: "Score the sum of all dice showing the number 3.",
+    },
+    {
+      pointType: PointType.Four,
+      name: "Fours",
+      description: "Score the sum of all dice showing the number 4.",
+    },
+    {
+      pointType: PointType.Five,
+      name: "Fives",
+      description: "Score the sum of all dice showing the number 5.",
+    },
+    {
+      pointType: PointType.Six,
+      name: "Sixes",
+      description: "Score the sum of all dice showing the number 6.",
+    },
+    {
+      pointType: PointType.ThreeOfaKind,
+      name: "Three Of a Kind",
+      description:
+        "Score the sum of all five dice if at least three of them show the same number.",
+    },
+    {
+      pointType: PointType.FourOfaKind,
+      name: "Four Of a Kind",
+      description:
+        "Score the sum of all five dice if at least four of them show the same number.",
+    },
+    {
+      pointType: PointType.SmallStraight,
+      name: "Small Straight",
+      description:
+        "Score 30 points if the dice show a sequence of four numbers (for example, 1-2-3-4 or 2-3-4-5).",
+    },
+    {
+      pointType: PointType.LargeStraight,
+      name: "Large Straight",
+      description:
+        "Score 40 points if the dice show a sequence of five numbers (for example, 1-2-3-4-5 or 2-3-4-5-6).",
+    },
+    {
+      pointType: PointType.Chance,
+      name: "Chance",
+      description:
+        "Score the total sum of all five dice, regardless of the combination.",
+    },
+    {
+      pointType: PointType.FullHouse,
+      name: "Full House",
+      description:
+        "Score 25 points if three of the dice show one number and the other two dice show another number.",
+    },
+    {
+      pointType: PointType.Yahtzee,
+      name: "Yahtzee",
+      description: "Score 50 points if all five dice show the same number.",
+    },
   ];
 
   const GetPointsFromType = (playerName: string, pointType: PointType) => {
@@ -114,15 +173,13 @@ export const Yahtzee = () => {
   };
 
   useEffect(() => {
-    const idParm = params.get('id');
+    const idParm = params.get("id");
 
-    if(idParm !== null){
-      JoinRoom(parseInt(idParm))
+    if (idParm !== null) {
+      JoinRoom(parseInt(idParm));
 
       return;
     }
-
-    FetchRooms();
 
     Auth.IsLoggedIn((suc) => {
       if (!suc) {
@@ -131,13 +188,17 @@ export const Yahtzee = () => {
     });
   }, []);
 
-  const OnEndGame = () => {
+  const OnEndGame = (data: any) => {
+    const endgame: Endgame = data;
+    setEndgameScreen(endgame);
     setGameEnded(true);
+
+    user.fetchUpdated();
   };
 
   const OnJoin = (data: any) => {
     const cells: PlayerCell[] = [];
-    
+
     for (const player of data.players) {
       const settedPoints: PointCell[] = [];
       for (const settedPoint of player.settedPoints) {
@@ -344,7 +405,7 @@ export const Yahtzee = () => {
         const diceElement = document.getElementById(`dice_${i}`);
 
         if (diceElement === null) {
-          console.error('dice Element is null')
+          console.error("dice Element is null");
           continue;
         }
 
@@ -353,7 +414,7 @@ export const Yahtzee = () => {
         const diceElement = document.getElementById(`dice_${i}`);
 
         if (diceElement === null) {
-          console.error('dice Element is null')
+          console.error("dice Element is null");
           continue;
         }
 
@@ -428,9 +489,9 @@ export const Yahtzee = () => {
       element.style.border = "";
 
       const mSelectedDices = [...selectedDices];
-      const diceArrayIndex = mSelectedDices.indexOf(dice.index, 0)
+      const diceArrayIndex = mSelectedDices.indexOf(dice.index, 0);
 
-      mSelectedDices.splice(diceArrayIndex, 1)
+      mSelectedDices.splice(diceArrayIndex, 1);
 
       setSelectedDices(mSelectedDices);
     } else {
@@ -445,104 +506,38 @@ export const Yahtzee = () => {
 
   const JoinRoom = (roomId: number) => {
     hubConnection.start().then(() => {
-      window.history.pushState('', '', '/yahtzee?id='+roomId)
+      window.history.pushState("", "", "/yahtzee?id=" + roomId);
 
       hubConnection.on("SetDices", setDices);
       hubConnection.on("OnJoin", OnJoin);
       hubConnection.on("OnNextRound", OnNextRound);
       hubConnection.on("OnEndGame", OnEndGame);
-
+      hubConnection.on("ForcedLeave", OnForcedLeave)
       hubConnection.invoke("Join", roomId).then((canJoin) => {
-        if(!canJoin){
-          console.log(canJoin)
-          FetchRooms();
-          hubConnection.stop();
-        }
-        else{
-          console.log(canJoin)
-          setIsPlaying(canJoin);
-        }
+        setIsPlaying(canJoin)
       });
     });
   };
 
-  const FetchRooms = async () => {
-    const response = await axios.get(Base.BASE_URL + "/api/yahtzee/fetch", {
-      headers: {
-        Authorization: Auth.GetAuthorizationHeader(),
-      },
-    });
-    setRooms(response.data);
-  };
+  const OnForcedLeave = (reason: string) => {
+    hubConnection.stop();
+    window.location.href = "/lobbies/yahtzee"
+  }
 
   const StartGame = () => {
     hubConnection.invoke("StartGame");
   };
 
-  const CreateRoom = async () => {
-    await axios
-      .post(
-        Base.BASE_URL + "/api/yahtzee/create",
-        {},
-        {
-          headers: {
-            Authorization: Auth.GetAuthorizationHeader(),
-          },
-        }
-      )
-      .then(async (x) => {
-        JoinRoom(x.data.id);
-      });
-  };
-
-  if (!isPlaying) {
-    return (
-      <div style={{ textAlign: "center" }}>
-        <div>
-          <div>
-            <button onClick={CreateRoom}>Create Room</button>
-          </div>
-        </div>
-        <h2 style={{ color: "white" }}>Rooms</h2>
-        <table style={{ color: "white" }}>
-          <tbody>
-            <tr>
-              <th>Room Id</th>
-              <th>Room Creator</th>
-              <th></th>
-            </tr>
-            {rooms.map((room, index) => {
-              return (
-                <tr key={"room_" + index}>
-                  <td>{room.id}</td>
-                  <td>{room.creator}</td>
-                  <td>
-                    <button
-                      onClick={() => JoinRoom(room.id)}
-                      style={{ width: "150%" }}
-                    >
-                      Join
-                    </button>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
-    );
-  }
-
   return (
     <div>
       <table>
         <tbody>
-          <tr>
+          <tr id="yahtzee-player_container">
             <th></th>
             {players.map((player, index) => {
               return (
                 <th
-                  style={{ color: player.hasRound ? "white" : "grey" }}
+                  style={{ color: player.hasRound ? "white" : "grey", padding: '20px'}}
                   key={"player_" + index}
                 >
                   {player.playerName} / {player.points}
@@ -589,6 +584,10 @@ export const Yahtzee = () => {
       {gameEnded && (
         <div className="game-end">
           <h3>Game Ended</h3>
+          <h3>Winner: {endgameScreen?.winnerUsername}</h3>
+          <h3>
+            Points Gotten: {Math.round(endgameScreen?.coinsGotten as number)}
+          </h3>
         </div>
       )}
       <div className="roll-btn">

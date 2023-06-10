@@ -49,40 +49,5 @@ public class WatchTogetherService
             CreatorName = user.Username,
             CreationTime = DateTime.UtcNow,
         };
-
-        await _context.WatchTogetherRooms.AddAsync(room);
-        await _context.SaveChangesAsync();
-    }
-
-    public async Task<WatchTogetherRoomApiModel?> GetRoom(int id)
-    {
-        WatchTogetherRoomModel? room = await _context.WatchTogetherRooms.Where(x => x.Id == id).FirstOrDefaultAsync();
-
-        if (room is null)
-        {
-            return null;
-        }
-
-        WatchTogetherRoomApiModel apiRoom = WatchTogetherRoomApiModel.FromRoomModel(room);
-
-        apiRoom.RoomCreator = _context.Users.Where(x => x.Id == room.CreatorId).FirstOrDefaultAsync().Result.Username;
-
-        return apiRoom;
-    }
-
-    public async Task<WatchTogetherRoomApiModel[]> FetchRooms(int count)
-    {
-        List<WatchTogetherRoomModel> rooms = await _context.WatchTogetherRooms.Take(count).ToListAsync();
-        WatchTogetherRoomApiModel[] apiRooms = new WatchTogetherRoomApiModel[rooms.Count];
-
-        for (int i = 0; i < rooms.Count; i++)
-        {
-            WatchTogetherRoomApiModel model = WatchTogetherRoomApiModel.FromRoomModel(rooms[i]);
-            model.RoomCreator = rooms[i].CreatorName;
-
-            apiRooms[i] = model;
-        }
-
-        return apiRooms;
     }
 }

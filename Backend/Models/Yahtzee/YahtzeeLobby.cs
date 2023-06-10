@@ -6,15 +6,16 @@ public class YahtzeeLobby
 
     public YahtzeePlayer? PlayerRound { get; set; }
 
-    public readonly YahtzeePlayer Creator;
+    public readonly uint CreatorId;
 
     public bool GameStarted { get; set; } = false;
+    public bool IsInitialized { get; private set; }
 
     public void StartGame()
     {
         GameStarted = true;
 
-        PlayerRound = Creator;
+        PlayerRound = Players[Random.Shared.Next(0, Players.Count-1)];
 
         foreach (YahtzeePlayer player in Players)
         {
@@ -74,8 +75,14 @@ public class YahtzeeLobby
         }
     }
 
-    public YahtzeeLobby(YahtzeePlayer creator)
+    public void Initialize(YahtzeePlayer creator)
     {
-        Creator = creator;
+        Players.Add(creator);
+        IsInitialized = true;
+    }
+
+    public YahtzeeLobby(uint creatorId)
+    {
+        CreatorId = creatorId;
     }
 }

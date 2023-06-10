@@ -7,6 +7,7 @@ using PuzonnsThings.Databases;
 using PuzonnsThings.Models.Todo;
 using PuzonnsThings.Models;
 using TodoApp.Repositories;
+using Backend.Models.Todo;
 
 namespace PuzonnsThings.Controllers;
 
@@ -14,17 +15,17 @@ namespace PuzonnsThings.Controllers;
 [ApiController]
 public class TodoController : ControllerBase
 {
-    private readonly DatabaseContext _context;
+    private readonly DatabaseContext dbContext;
     private readonly UserRepository _respository;
 
     public TodoController(DatabaseContext context, UserRepository respository)
     {
-        _context = context;
+        dbContext = context;
         _respository = respository;
     }
 
     [HttpPost("/api/[controller]/create")]
-    public async Task<IActionResult> CreateUserTodo([FromBody] TodoModel todo)
+    public async Task<IActionResult> CreateUserTodo([FromBody] TaskModelCreation task)
     {
         User? user = await GetUser();
 
@@ -33,25 +34,29 @@ public class TodoController : ControllerBase
             return Forbid();
         }
 
-        TodoModel dbTodo = new TodoModel()
+        if (!task.Validate(out string error))
         {
-            Date = todo.Date,
-            UserId = user.Id,
-            Name = todo.Name,
-            ProgressId = todo.ProgressId,
+            return BadRequest(error);
+        }
+
+        TaskModel taskModel = new TaskModel()
+        {
+            TaskEndDateTime = task.TaskEndDateTime,
+            TaskName = task.TaskName,
+            TaskProgressId = 2, //Uncompleted 
+            TaskPriority = task.TaskPriority,
+            UserId = user.Id
         };
 
-        await _context.TodoList.AddAsync(dbTodo);
+        await dbContext.TodoList.AddAsync(taskModel);
 
-        _context.TodoList.Entry(dbTodo).State = EntityState.Added;
+        await dbContext.SaveChangesAsync();
 
-        await _context.SaveChangesAsync();
-
-        return Ok(dbTodo);
+        return Ok(taskModel);
     }
 
     [HttpGet("/api/[controller]/fetch")]
-    public async Task<ActionResult<List<TodoModel>>> FetchUserTodoList()
+    public async Task<ActionResult<List<TaskModel>>> FetchUserTodoList()
     {
         User? user = await GetUser();
 
@@ -60,7 +65,7 @@ public class TodoController : ControllerBase
             return BadRequest();
         }
 
-        return Ok(_context.TodoList.Where(x => x.UserId == user.Id).ToList());
+        return Ok(dbContext.TodoList.Where(x => x.UserId == user.Id).ToList());
     }
 
     [HttpDelete("/api/[controller]/delete")]
@@ -73,12 +78,12 @@ public class TodoController : ControllerBase
             return Forbid();
         }
 
-        TodoModel? todo = await _context.TodoList.Where(x => x.UserId == user.Id && x.Id == todoDelete.Id).FirstOrDefaultAsync();
+        TaskModel? task = await dbContext.TodoList.Where(x => x.UserId == user.Id && x.Id == todoDelete.Id).FirstOrDefaultAsync();
 
-        if (todo is not null)
+        if (task is not null)
         {
-            _context.TodoList.Remove(todo);
-            await _context.SaveChangesAsync();
+            dbContext.TodoList.Remove(task);
+            await dbContext.SaveChangesAsync();
 
             return Ok();
         }
@@ -91,27 +96,28 @@ public class TodoController : ControllerBase
     {
         User? user = await GetUser();
 
-        TodoModel? model = await _context.TodoList.Where(x => x.UserId == user.Id && x.Id == update.TodoId).FirstOrDefaultAsync();
+        if (user is null)
+        {
+            return Forbid();
+        }
 
-        if (model is null)
+        TaskModel? task = await dbContext.TodoList.Where(x => x.UserId == user.Id && x.Id == update.TaskId).FirstOrDefaultAsync();
+
+        if (task is null)
         {
             return BadRequest("Todo with given id dose not exist");
         }
 
-        if (model.ProgressId == update.ProgressId)
-        {
-            return Ok();
-        }
+        task.TaskPriority = update.TaskPriority;
+        task.TaskName = update.TaskName;
+        task.TaskProgressId = update.TaskProgressId;
+        task.TaskEndDateTime = update.TaskEndDateTime;
 
-        model.ProgressId = update.ProgressId;
+        dbContext.TodoList.Update(task);
 
-        _context.TodoList.Entry(model).State = EntityState.Modified;
+        await dbContext.SaveChangesAsync(); 
 
-        _context.TodoList.Update(model);
-
-        await _context.SaveChangesAsync();
-
-        return Ok();
+        return Ok(task);
     }
 
     private async Task<User?> GetUser()

@@ -1,7 +1,7 @@
 import axios from "axios";
 import { useState, useEffect } from "react";
 import { Auth } from "./Auth";
-import { Base } from "../Shared/Config";
+import { Config } from "../Shared/Config";
 
 export const Register = () => {
   const [error, setError] = useState<string>("");
@@ -25,7 +25,7 @@ export const Register = () => {
 
     axios
       .post(
-        Base.BASE_URL + "/api/auth/register",
+        Config.GetApiUrl() + "/api/auth/register",
         JSON.stringify(registerModel),
         {
           headers: {
@@ -44,34 +44,39 @@ export const Register = () => {
   };
 
   return (
-    <form onSubmit={HandleRegisterFormSubmit} className="login-form">
-      <h2>Welcome to Puzonns Things!</h2>
-      <span style={{ color: "#ffffff99" }}>Create your account here</span>
-      <div>
-        <input name="username" required placeholder="Username" type="text" />
-      </div>
-      <div>
-        <input name="email" placeholder="Optional Email" type="text" />
-      </div>
-      <div>
-        <input
-          name="password"
-          required
-          autoComplete="false"
-          placeholder="Password"
-          type="password"
-        />
-      </div>
-      <button name="submit" type="submit">
-        Create Account
-      </button>
-      <div>
-        <a style={{ color: "red" }}>{error}</a>
-      </div>
-      <a href="/login">
-        {" "}
-        Already have account? <span>Click here</span>{" "}
-      </a>
-    </form>
+    <div id="login-container">
+      <form onSubmit={HandleRegisterFormSubmit} id="login-form">
+        <h2>Welcome to Puzonns Things!</h2>
+        <span style={{ color: "#ffffff99" }}>Create your account here</span>
+        <div>
+          <input name="username" required placeholder="Username" type="text" />
+        </div>
+        <div>
+          <input name="email" placeholder="Optional Email" type="text" />
+        </div>
+        <div>
+          <input
+            name="password"
+            required
+            autoComplete="false"
+            placeholder="Password"
+            type="password"
+          />
+        </div>
+        <button name="submit" type="submit">
+          Create Account
+        </button>
+        <div>
+          <a style={{ color: "red" }}>{error}</a>
+        </div>
+        <a href="/login">
+          Already have account? <span style={{textDecoration: 'underline'}}>Click here</span>
+        </a>
+        <p id="register-email_info">
+          After providing your email, you will be able to utilize the password
+          reminder/change feature.
+        </p>
+      </form>
+    </div>
   );
 };

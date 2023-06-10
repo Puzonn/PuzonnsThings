@@ -44,6 +44,7 @@ public class WatchTogetherController : ControllerBase
     [HttpPost("/api/[controller]/join")]
     public async Task<ActionResult> JoinRoom([FromQuery] int id)
     {
+        /*
         User? user = await GetUser();
 
         if (user is null)
@@ -58,34 +59,8 @@ public class WatchTogetherController : ControllerBase
             return BadRequest("Room with given id dose not exist");
         }
 
+        */
         return Ok();
-    }
-
-    [HttpGet("/api/[controller]/get")]
-    public async Task<ActionResult> GetRoom([FromQuery] int id)
-    {
-        User? user = await GetUser();
-
-        if (user is null)
-        {
-            return Forbid();
-        }
-
-        WatchTogetherRoomApiModel? room = await watchTogetherService.GetRoom(id);
-
-        if (room is null)
-        {
-            return BadRequest("Room with given id dose not exist");
-        }
-
-        return Ok(room);
-    }
-
-    [AllowAnonymous]
-    [HttpGet("/api/[controller]/fetch")]
-    public async Task<ActionResult<WatchTogetherRoomApiModel[]>> FetchRooms()
-    {
-        return Ok(await watchTogetherService.FetchRooms(10));
     }
 
     private async Task<User?> GetUser()

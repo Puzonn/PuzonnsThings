@@ -16,6 +16,9 @@ public class User
     [JsonPropertyName("Id")]
     public int Id { get; set; }
 
+    [JsonPropertyName("Coins")]
+    public float Coins { get; set; } = 0;
+
     public User(string username, string password, string? email = null)
     {
         Username = username;
