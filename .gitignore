@@ -8,3 +8,10 @@
 /Frontend/node_modules
 /Backend/Properties
 *.db
+/Backend/bin/Release/net7.0
+/Backend/Backend.csproj.user
+/Backend/PuzonnsThingsDb.db-shm
+/Backend/PuzonnsThingsDb.db-wal
+/Frontend/build
+*.env
+/Backend/.config
