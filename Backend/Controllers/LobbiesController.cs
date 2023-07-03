@@ -27,7 +27,7 @@ public class LobbiesController : ControllerBase
     [HttpGet("/api/[controller]/fetch/{lobbyType}")]
     public Task<LobbyModel[]> FetchLobbies(string lobbyType)
     {
-        if (LobbyTypes.Yahtzee.Name == lobbyType)
+        if (LobbyTypes.Yahtzee.ApiName == lobbyType)
         {
             return repository.FetchLobbies(LobbyTypes.Yahtzee);
         }
@@ -60,8 +60,6 @@ public class LobbiesController : ControllerBase
             };
 
             LobbyModel lobby = await repository.AddLobby(model);
-
-            YahtzeeHub.AddRoom(lobby.Id, new YahtzeeLobby((uint)user.Id));
 
             return lobby;
         }

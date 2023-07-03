@@ -47,45 +47,51 @@ export const Yahtzee = () => {
   const cells: CellPoint[] = [
     {
       pointType: PointType.One,
-      name: "Ones",
+      name: "Ones (1)",
       description: "Score the sum of all dice showing the number 1.",
     },
     {
       pointType: PointType.Two,
-      name: "Twos",
+      name: "Twos (2)",
       description: "Score the sum of all dice showing the number 2.",
     },
     {
       pointType: PointType.Three,
-      name: "Threes",
+      name: "Threes (3)",
       description: "Score the sum of all dice showing the number 3.",
     },
     {
       pointType: PointType.Four,
-      name: "Fours",
+      name: "Fours (4)",
       description: "Score the sum of all dice showing the number 4.",
     },
     {
       pointType: PointType.Five,
-      name: "Fives",
+      name: "Fives (5)",
       description: "Score the sum of all dice showing the number 5.",
     },
     {
       pointType: PointType.Six,
-      name: "Sixes",
+      name: "Sixes (6)",
       description: "Score the sum of all dice showing the number 6.",
     },
     {
       pointType: PointType.ThreeOfaKind,
-      name: "Three Of a Kind",
+      name: "Three Of a Kind (3x)",
       description:
         "Score the sum of all five dice if at least three of them show the same number.",
     },
     {
       pointType: PointType.FourOfaKind,
-      name: "Four Of a Kind",
+      name: "Four Of a Kind (4x)",
       description:
         "Score the sum of all five dice if at least four of them show the same number.",
+    },
+    {
+      pointType: PointType.FullHouse,
+      name: "Full House (3+2x)",
+      description:
+        "Score 25 points if three of the dice show one number and the other two dice show another number.",
     },
     {
       pointType: PointType.SmallStraight,
@@ -104,12 +110,6 @@ export const Yahtzee = () => {
       name: "Chance",
       description:
         "Score the total sum of all five dice, regardless of the combination.",
-    },
-    {
-      pointType: PointType.FullHouse,
-      name: "Full House",
-      description:
-        "Score 25 points if three of the dice show one number and the other two dice show another number.",
     },
     {
       pointType: PointType.Yahtzee,
@@ -231,6 +231,7 @@ export const Yahtzee = () => {
 
     if (rollCount > 0 && gameStarted) {
       setRollCount(rollCount - 1);
+      setSelectedDices([])
       hubConnection.send("OnRollDices", selectedDices);
     }
   }, [isRolling]);
@@ -482,6 +483,7 @@ export const Yahtzee = () => {
     }
 
     const element = document.getElementById(`dice_${dice.index}`);
+
     if (element === null) return;
 
     if (dice.isSelected) {
@@ -489,10 +491,8 @@ export const Yahtzee = () => {
       element.style.border = "";
 
       const mSelectedDices = [...selectedDices];
-      const diceArrayIndex = mSelectedDices.indexOf(dice.index, 0);
-
+      const diceArrayIndex = mSelectedDices.indexOf(dice.index)
       mSelectedDices.splice(diceArrayIndex, 1);
-
       setSelectedDices(mSelectedDices);
     } else {
       dice.isSelected = true;
@@ -512,17 +512,18 @@ export const Yahtzee = () => {
       hubConnection.on("OnJoin", OnJoin);
       hubConnection.on("OnNextRound", OnNextRound);
       hubConnection.on("OnEndGame", OnEndGame);
-      hubConnection.on("ForcedLeave", OnForcedLeave)
+      hubConnection.on("ForcedLeave", OnForcedLeave);
       hubConnection.invoke("Join", roomId).then((canJoin) => {
-        setIsPlaying(canJoin)
+        setIsPlaying(canJoin);
       });
     });
   };
 
   const OnForcedLeave = (reason: string) => {
     hubConnection.stop();
-    window.location.href = "/lobbies/yahtzee"
-  }
+    console.warn(reason)
+    window.location.href = "/lobbies?type=yahtzee";
+  };
 
   const StartGame = () => {
     hubConnection.invoke("StartGame");
@@ -537,7 +538,10 @@ export const Yahtzee = () => {
             {players.map((player, index) => {
               return (
                 <th
-                  style={{ color: player.hasRound ? "white" : "grey", padding: '20px'}}
+                  style={{
+                    color: player.hasRound ? "white" : "grey",
+                    padding: "20px",
+                  }}
                   key={"player_" + index}
                 >
                   {player.playerName} / {player.points}
@@ -586,7 +590,10 @@ export const Yahtzee = () => {
           <h3>Game Ended</h3>
           <h3>Winner: {endgameScreen?.winnerUsername}</h3>
           <h3>
-            Points Gotten: {Math.round(endgameScreen?.coinsGotten as number)}
+            Won:{" "}
+            <span style={{ color: "var(--color-yellow)" }}>
+              {Math.round(endgameScreen?.coinsGotten as number)}$
+            </span>
           </h3>
         </div>
       )}

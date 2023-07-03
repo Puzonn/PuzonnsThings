@@ -29,10 +29,10 @@ export const Home = () => {
           <h3>Mini Games</h3>
           <ul>
             <li>
-              <a href="/lobbies/yahtzee">Yahtzee</a>
+              <a href="/lobbies?type=yahtzee">Yahtzee</a>
             </li>
             <li>
-              <a href="/lobbies/watchtogether">Wheel Of Fortune</a>
+              <a href="/wheel">Wheel Of Fortune</a>
             </li>
           </ul>
         </div>
@@ -40,7 +40,7 @@ export const Home = () => {
           <h3>Other</h3>
           <ul>
             <li>
-              <a href="/watchtogether">Watch Together</a>
+              <a href="/lobbies?type=watchtogether">Watch Together</a>
             </li>
             <li>
               <a href="/todo">Todo App</a>

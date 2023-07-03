@@ -11,6 +11,7 @@ using PuzonnsThings.Services;
 using TodoApp.Repositories;
 using Backend.Hubs;
 using Backend.Repositories;
+using Backend.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -108,7 +109,10 @@ builder.Services.AddDbContext<DatabaseContext>(x =>
     x.UseSqlite(builder.Configuration["ConnectionStrings:Db"]);
 });
 
+builder.Services.AddScoped<YahtzeeLobbyService>();
 builder.Services.AddSingleton<WheelService>();
+builder.Services.AddSingleton<MemoryLobbyCollector>();
+
 builder.Services.AddScoped<WatchTogetherService>();
 builder.Services.AddScoped<UserRepository>();
 builder.Services.AddScoped<LobbyRepository>();  

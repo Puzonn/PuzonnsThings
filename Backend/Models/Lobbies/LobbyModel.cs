@@ -9,5 +9,6 @@ public class LobbyModel
     public required int MaxPlayersCount { get; set; }
     public required LobbyStatus Status { get; set; }
     public required int CreatorUserId { get; set; }
+    public bool LobbyEnded { get; set; } = false;
     public uint Id { get; set; }   
 }

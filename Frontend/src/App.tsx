@@ -75,7 +75,7 @@ export function App() {
             <Route path="/yahtzee/:id?" element={<Yahtzee />}></Route>
             <Route path="/wheel" element={<Casino />}></Route>
             <Route path="/home" element={<Home />}></Route>
-            <Route path="/lobbies/:game?" element={<Lobbies />}></Route>
+            <Route path="/lobbies/:type?" element={<Lobbies />}></Route>
             <Route path="/contact" element={<ContactAndInformations />}></Route>
             <Route
               path="/informations"

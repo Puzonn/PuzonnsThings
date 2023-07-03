@@ -15,7 +15,7 @@ public class YahtzeePlayer
     public int RollCount { get; set; } = 2;
     public bool CanRoll => RollCount > 0;
 
-    public uint LobbyId { get; set; }
+    public uint ConnectedLobbyId { get; set; }
 
     public readonly YahtzeeDice[] Dices = new YahtzeeDice[MaxDices];
     public readonly List<YahtzeeSettedPoint> SettedPoints = new List<YahtzeeSettedPoint>();
@@ -34,7 +34,7 @@ public class YahtzeePlayer
 
     public void Restart(uint lobbyId)
     {
-        LobbyId = lobbyId;
+        ConnectedLobbyId = lobbyId;
         Points = 0;
         SettedPoints.Clear();
     }

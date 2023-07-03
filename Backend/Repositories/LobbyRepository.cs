@@ -23,12 +23,17 @@ public class LobbyRepository : ILobbyRepository
 
     public Task<LobbyModel[]> FetchAllLobbies()
     {
-        return dbContext.Lobbies.ToArrayAsync();
+        return dbContext.Lobbies.Where(x=> !x.LobbyEnded).ToArrayAsync();
     }
 
     public Task<LobbyModel[]> FetchLobbies(LobbyType type)
     {
-        return dbContext.Lobbies.Where(x => x.LobbyType == type.Name).ToArrayAsync();
+        return dbContext.Lobbies.Where(x => x.LobbyType == type.Name && !x.LobbyEnded).ToArrayAsync();
+    }
+
+    public Task<LobbyModel?> GetLobby(uint lobbyId)
+    {
+        return dbContext.Lobbies.Where(x => x.Id == lobbyId).FirstOrDefaultAsync();
     }
 
     public Task RemoveLobby(LobbyModel lobby)
@@ -36,8 +41,21 @@ public class LobbyRepository : ILobbyRepository
         throw new NotImplementedException();
     }
 
-    public Task UpdateLobby(LobbyModel lobby)
+    public async Task RemoveLobby(uint lobbyId)
     {
-        throw new NotImplementedException();
+        LobbyModel? lobby;
+
+        if ((lobby = await dbContext.Lobbies.Where(x => x.Id == lobbyId).FirstOrDefaultAsync()) is not null)
+        {
+            dbContext.Lobbies.Remove(lobby);
+        }
+    }
+
+    public async Task SaveChangesAsync() => await dbContext.SaveChangesAsync();
+
+    public async Task UpdateLobby(LobbyModel lobby)
+    {
+        dbContext.Lobbies.Update(lobby);
+        await SaveChangesAsync();
     }
 }

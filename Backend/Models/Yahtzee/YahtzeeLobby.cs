@@ -1,15 +1,24 @@
-﻿namespace PuzonnsThings.Models.Yahtzee;
+﻿using Backend.Models;
+using Backend.Services;
 
-public class YahtzeeLobby
+namespace PuzonnsThings.Models.Yahtzee;
+
+public class YahtzeeLobby : ILobbyCollectable
 {
     public readonly List<YahtzeePlayer> Players = new List<YahtzeePlayer>(4);
 
     public YahtzeePlayer? PlayerRound { get; set; }
 
+    public int ActivePlayers { get => Players.Count; }
+
+    public uint LobbyId { get; }
     public readonly uint CreatorId;
 
+    public bool GameEnded { get; set; } = false;
     public bool GameStarted { get; set; } = false;
     public bool IsInitialized { get; private set; }
+
+    public DateTime LastLobbySnapshot { get; set; } = DateTime.Now;
 
     public void StartGame()
     {
@@ -81,8 +90,9 @@ public class YahtzeeLobby
         IsInitialized = true;
     }
 
-    public YahtzeeLobby(uint creatorId)
+    public YahtzeeLobby(uint creatorId, uint lobbyId)
     {
         CreatorId = creatorId;
+        LobbyId = lobbyId;
     }
 }

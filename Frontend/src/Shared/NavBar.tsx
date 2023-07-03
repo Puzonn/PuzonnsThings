@@ -135,7 +135,7 @@ export const NavBar = () => {
         {isLoggedIn && (
           <div>
             <span className="nav-item">
-              {Username} {Coins} <span style={{color: 'var(--color-yellow)'}}>*</span>
+              {Username} {Coins} <span style={{color: 'var(--color-yellow)'}}>$</span>
             </span>
             <button onClick={HandleLogout}>Logout</button>
           </div>
