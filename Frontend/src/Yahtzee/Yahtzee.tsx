@@ -3,18 +3,30 @@ import "./Yahtzee.css";
 import {
   Dice,
   PointType,
-  CellPoint,
   RoomModel,
   Player,
   PlayerCell,
   PointCell,
   Endgame,
+  PointCells,
+  Options,
+  OptionsMaxPlayersState,
+  GameTimer,
+  Lobby,
 } from "../Types/YahtzeeTypes";
 import * as signalR from "@microsoft/signalr";
 import { Config } from "../Shared/Config";
 import { Auth } from "../Auth/Auth";
 import { useSearchParams } from "react-router-dom";
 import { UserContext } from "../Shared/UserContext";
+import { LobbyManager } from "../Shared/LobbyManager";
+import { CalculatePoints } from "./YahtzeeCalculator";
+import {
+  GetCellClass,
+  GetDiceImage,
+  GetPointsFromType,
+  HasSetPoint,
+} from "./YahtzeeUtil";
 
 const hubConnection = new signalR.HubConnectionBuilder()
   .withUrl(Config.GetApiUrl() + "/services/yahtzeeservice", {
@@ -25,151 +37,103 @@ const hubConnection = new signalR.HubConnectionBuilder()
 export const Yahtzee = () => {
   const user = useContext(UserContext);
 
-  const CurrentPlayerName = user.Username
-    ? user.Username
-    : "<undefined username>";
-
   const [dices, setDices] = useState<Dice[]>([]);
   const [isRolling, setRollState] = useState<boolean>(false);
   const [selectedDices, setSelectedDices] = useState<number[]>([]);
-  const [pointCells, setPointCells] = useState<PlayerCell[]>([]);
-  const [rooms, setRooms] = useState<RoomModel[]>([]);
-  const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [hasRound, setHasRound] = useState<boolean>(false);
   const [isCreator, setCreator] = useState<boolean>(false);
-  const [gameStarted, setGameStarted] = useState<boolean>(false);
-  const [players, setPlayers] = useState<Player[]>([]);
+  const [lobby, setLobby] = useState<Lobby>({
+    playerCells: [],
+    lobbyId: -1,
+    options: { maxPlayersCount: -1, gameTime: -1 },
+    gameStarted: false,
+    players: [],
+    startState: false,
+    isCreator: false,
+  });
   const [rollCount, setRollCount] = useState<number>(2);
   const [gameEnded, setGameEnded] = useState<boolean>(false);
   const [endgameScreen, setEndgameScreen] = useState<Endgame>();
+  const [timerTime, setTimerTime] = useState(0);
+  const [playerTimes, setPlayerTimes] = useState({});
+  const [timerState, setTimerState] = useState(false)
+
   const [params] = useSearchParams();
+  const cells = PointCells;
 
-  const cells: CellPoint[] = [
-    {
-      pointType: PointType.One,
-      name: "Ones (1)",
-      description: "Score the sum of all dice showing the number 1.",
-    },
-    {
-      pointType: PointType.Two,
-      name: "Twos (2)",
-      description: "Score the sum of all dice showing the number 2.",
-    },
-    {
-      pointType: PointType.Three,
-      name: "Threes (3)",
-      description: "Score the sum of all dice showing the number 3.",
-    },
-    {
-      pointType: PointType.Four,
-      name: "Fours (4)",
-      description: "Score the sum of all dice showing the number 4.",
-    },
-    {
-      pointType: PointType.Five,
-      name: "Fives (5)",
-      description: "Score the sum of all dice showing the number 5.",
-    },
-    {
-      pointType: PointType.Six,
-      name: "Sixes (6)",
-      description: "Score the sum of all dice showing the number 6.",
-    },
-    {
-      pointType: PointType.ThreeOfaKind,
-      name: "Three Of a Kind (3x)",
-      description:
-        "Score the sum of all five dice if at least three of them show the same number.",
-    },
-    {
-      pointType: PointType.FourOfaKind,
-      name: "Four Of a Kind (4x)",
-      description:
-        "Score the sum of all five dice if at least four of them show the same number.",
-    },
-    {
-      pointType: PointType.FullHouse,
-      name: "Full House (3+2x)",
-      description:
-        "Score 25 points if three of the dice show one number and the other two dice show another number.",
-    },
-    {
-      pointType: PointType.SmallStraight,
-      name: "Small Straight",
-      description:
-        "Score 30 points if the dice show a sequence of four numbers (for example, 1-2-3-4 or 2-3-4-5).",
-    },
-    {
-      pointType: PointType.LargeStraight,
-      name: "Large Straight",
-      description:
-        "Score 40 points if the dice show a sequence of five numbers (for example, 1-2-3-4-5 or 2-3-4-5-6).",
-    },
-    {
-      pointType: PointType.Chance,
-      name: "Chance",
-      description:
-        "Score the total sum of all five dice, regardless of the combination.",
-    },
-    {
-      pointType: PointType.Yahtzee,
-      name: "Yahtzee",
-      description: "Score 50 points if all five dice show the same number.",
-    },
-  ];
-
-  const GetPointsFromType = (playerName: string, pointType: PointType) => {
-    const point = pointCells.find((x) => x.playerName === playerName);
-
-    if (typeof point === "undefined") {
-      return "";
-    }
-    return point.pointCell.find(
-      (x) => typeof x !== "undefined" && x.pointType === pointType
-    )?.points;
+  const ChangeMaxPlayersState = (state: number) => {
+    hubConnection.send("OnOptionsMaxPlayersChange", state);
   };
 
-  const HasSetPoint = (playerName: string, pointType: PointType) => {
-    const points = pointCells.find((x) => x.playerName === playerName);
+  const ChangeMaxPlayersStateCallback = (state: OptionsMaxPlayersState) => {
+    setLobby((prev) => {
+      const option = prev.options;
+      option.maxPlayersCount = state.maxPlayersState;
+      return { ...prev, options: option, players: state.players };
+    });
+  };
 
-    if (typeof points === "undefined") {
-      return false;
-    }
+  const ChoosePlaceStateCallback = (response: any) => {
+    setLobby((prev) => {
+      return {
+        ...prev,
+        players: response.players,
+        startState: response.startState,
+      };
+    });
+  };
 
-    if (typeof points.pointCell === "undefined") {
-      return false;
-    }
+  useEffect(() => {
+    setTimeout(() => {
+      //Just a reducer to update times
+      setTimerTime((prev) => {
+        return prev + 1;
+      });
 
-    for (const point of points.pointCell) {
-      if (
-        typeof point === "undefined" ||
-        typeof point.pointType === "undefined"
-      ) {
-        continue;
-      }
-      if (point.pointType === pointType) {
-        return true;
-      }
-    }
+      setPlayerTimes((prev) => {
+        if(!lobby.gameStarted || timerState === false){
+          return prev;
+        }
 
-    return false;
+        const playerRound = lobby.players.find((x) => x.hasRound);
+
+        if (!playerRound) {
+          console.error("Cannot find playerRound")
+          return prev;
+        }
+
+        (prev as any)[playerRound.userId] = playerRound.gameTime -= 1;
+        return prev;
+      });
+    }, 1000);
+  }, [timerTime]);
+
+  const OnLobbyPlaceClick = (placeId: number) => {
+    hubConnection.send("OnLobbyPlaceClick", placeId);
+  };
+
+  const ChoosePlaceState = (placeId: number) => {
+    hubConnection.send("OnChoosePlaceState", placeId);
   };
 
   const SetPointsFromType = (
-    playerName: string,
+    userId: number,
     pointType: PointType,
     points: number
   ) => {
-    const settedPoints = [...pointCells];
+    const settedPoints = [...lobby.playerCells];
 
-    const point = settedPoints.find((x) => x.playerName === playerName);
+    const point = settedPoints.find((x) => x.userId === userId);
 
     if (typeof point === "undefined") {
-      console.error(`Point of ${playerName} has undefined row ${pointType}`);
+      console.error(`Point of ${userId} has undefined row ${pointType}`);
       return;
     }
     point.pointCell[pointType] = { pointType: pointType, points: points };
-    setPointCells(settedPoints);
+
+    setLobby((prev) => {
+      return { ...prev, playerCells: settedPoints };
+    });
   };
 
   useEffect(() => {
@@ -181,18 +145,20 @@ export const Yahtzee = () => {
       return;
     }
 
-    Auth.IsLoggedIn((suc) => {
-      if (!suc) {
+    Auth.IsLoggedIn((success) => {
+      if (!success) {
         window.location.href = "/login";
       }
     });
   }, []);
 
   const OnEndGame = (data: any) => {
+    console.log(data)
     const endgame: Endgame = data;
+
     setEndgameScreen(endgame);
     setGameEnded(true);
-
+    setTimerState(false)
     user.fetchUpdated();
   };
 
@@ -207,21 +173,32 @@ export const Yahtzee = () => {
           points: settedPoint.pointsFromPoint,
         });
       }
-      cells.push({ playerName: player.playerName, pointCell: settedPoints });
+      cells.push({ userId: player.userId, pointCell: settedPoints });
     }
 
-    setPointCells(cells);
+    const joinnedLobby: Lobby = {
+      players: data.players,
+      options: data.options,
+      playerCells: cells,
+      gameStarted: data.gameStarted,
+      lobbyId: data.lobbyId,
+      startState: data.startState,
+      isCreator: data.isCreator,
+    };
 
-    if (data.hasRound) {
-      setDices(data.dices);
+    const times = {};
+    for (const player of data.players) {
+      (times as any)[player.userId] = player.gameTime;
     }
+
+    setPlayerTimes(times);
+    setLobby(joinnedLobby);
 
     setRollCount(data.rollCount);
-    setGameStarted(data.gameStarted);
     setHasRound(data.hasRound);
     setCreator(data.isCreator);
-    setPlayers(data.players);
     setDices(data.dices);
+    setTimerState(joinnedLobby.gameStarted)
   };
 
   useEffect(() => {
@@ -229,176 +206,30 @@ export const Yahtzee = () => {
       return;
     }
 
-    if (rollCount > 0 && gameStarted) {
+    if (rollCount > 0 && lobby.gameStarted) {
       setRollCount(rollCount - 1);
-      setSelectedDices([])
+      setSelectedDices([]);
       hubConnection.send("OnRollDices", selectedDices);
     }
   }, [isRolling]);
 
-  useEffect(() => {}, [pointCells]);
+  const GetCell = (userId: number, pointType: PointType) => {
+    const playerRound = lobby.players.find((x) => x.hasRound);
 
-  const CalculatePoints = (pointType: PointType) => {
-    switch (pointType) {
-      case PointType.One:
-        return dices.filter((x) => x.rolledDots === 1).length;
-      case PointType.Two:
-        return dices.filter((x) => x.rolledDots === 2).length * 2;
-      case PointType.Three:
-        return dices.filter((x) => x.rolledDots === 3).length * 3;
-      case PointType.Four:
-        return dices.filter((x) => x.rolledDots === 4).length * 4;
-      case PointType.Five:
-        return dices.filter((x) => x.rolledDots === 5).length * 5;
-      case PointType.Six:
-        return dices.filter((x) => x.rolledDots === 6).length * 6;
-      case PointType.ThreeOfaKind: {
-        const counts: { [key: number]: number } = {};
-        let sum = 0;
-        for (const dice of dices) {
-          counts[dice.rolledDots] = (counts[dice.rolledDots] || 0) + 1;
-          sum += dice.rolledDots;
-        }
-        for (const count in counts) {
-          if (counts[count] >= 3) {
-            return sum;
-          }
-        }
-        return 0;
-      }
-      case PointType.FourOfaKind: {
-        const counts: { [key: number]: number } = {};
-        let sum = 0;
-        for (const dice of dices) {
-          counts[dice.rolledDots] = (counts[dice.rolledDots] || 0) + 1;
-          sum += dice.rolledDots;
-        }
-        for (const count in counts) {
-          if (counts[count] >= 4) {
-            return sum;
-          }
-        }
-        return 0;
-      }
-      case PointType.SmallStraight: {
-        let rolledDices: number[] = [];
-
-        dices.forEach((roll) => {
-          rolledDices.push(roll.rolledDots);
-        });
-
-        rolledDices = [...new Set(rolledDices)];
-
-        rolledDices.sort((a, b) => a - b);
-
-        if (rolledDices.length < 4) {
-          return 0;
-        }
-
-        if (
-          rolledDices[0] === 1 &&
-          rolledDices[1] === 2 &&
-          rolledDices[2] === 3 &&
-          rolledDices[3] === 4
-        ) {
-          return 30;
-        }
-        if (
-          rolledDices[1] === 2 &&
-          rolledDices[2] === 3 &&
-          rolledDices[3] === 4 &&
-          rolledDices[4] === 5
-        ) {
-          return 30;
-        }
-        if (
-          rolledDices[2] === 3 &&
-          rolledDices[3] === 4 &&
-          rolledDices[4] === 5 &&
-          rolledDices[5] === 6
-        ) {
-          return 30;
-        }
-
-        return 0;
-      }
-      case PointType.LargeStraight: {
-        let rolledDices: number[] = [];
-
-        dices.forEach((roll) => {
-          rolledDices.push(roll.rolledDots);
-        });
-
-        rolledDices = [...new Set(rolledDices)];
-        rolledDices.sort((a, b) => a - b);
-
-        if (
-          rolledDices.toString() === "1,2,3,4,5" ||
-          rolledDices.toString() === "2,3,4,5,6"
-        ) {
-          return 40;
-        }
-        return 0;
-      }
-      case PointType.Chance: {
-        let sum = 0;
-
-        for (let i = 0; i < dices.length; i++) {
-          sum += dices[i].rolledDots;
-        }
-
-        return sum;
-      }
-      case PointType.Yahtzee: {
-        const counts: { [key: number]: number } = {};
-        for (const dice of dices) {
-          counts[dice.rolledDots] = (counts[dice.rolledDots] || 0) + 1;
-        }
-        if (Object.keys(counts).length === 1) {
-          return 50;
-        }
-        return 0;
-      }
-      case PointType.FullHouse: {
-        const counts: { [key: number]: number } = {};
-        for (const dice of dices) {
-          counts[dice.rolledDots] = (counts[dice.rolledDots] || 0) + 1;
-        }
-        const frequencies = Object.values(counts);
-        if (frequencies.includes(2) && frequencies.includes(3)) {
-          return 25;
-        }
-        return 0;
-      }
-    }
-  };
-
-  const GetCell = (playerName: string, pointType: PointType) => {
-    if (!gameStarted) {
-      return "";
-    }
-    if (HasSetPoint(playerName, pointType)) {
-      return GetPointsFromType(playerName, pointType);
-    } else {
-      if (!hasRound) {
-        return "";
-      }
-      if (playerName === CurrentPlayerName) {
-        return CalculatePoints(pointType);
-      }
-    }
-  };
-
-  const GetCellClass = (playerName: string, pointType: PointType) => {
-    if (HasSetPoint(playerName, pointType)) {
-      return "point-setted";
+    if (!playerRound) {
+      console.error(`Can't calculate cell <${userId}>`);
+      return "<undefined>";
     }
 
-    return "point-unsetted";
+    if (playerRound.userId !== userId) {
+      return GetPointsFromType(lobby.playerCells, userId, pointType);
+    }
+
+    return CalculatePoints(dices, pointType);
   };
 
   useEffect(() => {
-    if (!gameStarted) {
+    if (!lobby.gameStarted) {
       return;
     }
     for (let i = 0; i < dices.length; i++) {
@@ -426,6 +257,7 @@ export const Yahtzee = () => {
 
   const OnNextRound = (data: any) => {
     const cells: PlayerCell[] = [];
+
     setRollCount(2);
     setSelectedDices([]);
     setDices(data.dices);
@@ -439,12 +271,12 @@ export const Yahtzee = () => {
           points: settedPoint.pointsFromPoint,
         });
       }
-      cells.push({ playerName: player.playerName, pointCell: settedPoints });
+      cells.push({ userId: player.userId, pointCell: settedPoints });
     }
-
-    setPointCells(cells);
     setHasRound(data.hasRound);
-    setPlayers(data.players);
+    setLobby((prev) => {
+      return { ...prev, playerCells: cells, players: data.players };
+    });
   };
 
   const OnPointSet = (pointType: PointType) => {
@@ -456,25 +288,8 @@ export const Yahtzee = () => {
         return;
       }
 
-      SetPointsFromType(CurrentPlayerName, x.point, x.pointsFromPoint);
+      SetPointsFromType(user.UserId, x.point, x.pointsFromPoint);
     });
-  };
-
-  const GetDiceImage = (rolledNumber: number) => {
-    switch (rolledNumber) {
-      case 1:
-        return require("./Assets/dice1.png");
-      case 2:
-        return require("./Assets/dice2.png");
-      case 3:
-        return require("./Assets/dice3.png");
-      case 4:
-        return require("./Assets/dice4.png");
-      case 5:
-        return require("./Assets/dice5.png");
-      case 6:
-        return require("./Assets/dice6.png");
-    }
   };
 
   const SelectToRollDice = (dice: Dice) => {
@@ -491,7 +306,7 @@ export const Yahtzee = () => {
       element.style.border = "";
 
       const mSelectedDices = [...selectedDices];
-      const diceArrayIndex = mSelectedDices.indexOf(dice.index)
+      const diceArrayIndex = mSelectedDices.indexOf(dice.index);
       mSelectedDices.splice(diceArrayIndex, 1);
       setSelectedDices(mSelectedDices);
     } else {
@@ -509,19 +324,22 @@ export const Yahtzee = () => {
       window.history.pushState("", "", "/yahtzee?id=" + roomId);
 
       hubConnection.on("SetDices", setDices);
+      hubConnection.on(
+        "ChangeMaxPlayersStateCallback",
+        ChangeMaxPlayersStateCallback
+      );
       hubConnection.on("OnJoin", OnJoin);
       hubConnection.on("OnNextRound", OnNextRound);
       hubConnection.on("OnEndGame", OnEndGame);
       hubConnection.on("ForcedLeave", OnForcedLeave);
-      hubConnection.invoke("Join", roomId).then((canJoin) => {
-        setIsPlaying(canJoin);
-      });
+      hubConnection.on("ChoosePlaceStateCallback", ChoosePlaceStateCallback);
+      hubConnection.invoke("Join", roomId).then((canJoin) => {});
     });
   };
 
   const OnForcedLeave = (reason: string) => {
     hubConnection.stop();
-    console.warn(reason)
+    console.warn(reason);
     window.location.href = "/lobbies?type=yahtzee";
   };
 
@@ -529,38 +347,98 @@ export const Yahtzee = () => {
     hubConnection.invoke("StartGame");
   };
 
+  if (!lobby.gameStarted) {
+    return (
+      <div>
+        <LobbyManager
+          OnStartClick={StartGame}
+          StartReadyState={lobby.startState}
+          LobbyOptions={lobby.options}
+          OnChoosePlaceState={ChoosePlaceState}
+          OnChangeMaxPlayersState={ChangeMaxPlayersState}
+          OnLobbyPlaceClick={OnLobbyPlaceClick}
+          LobbyId={lobby.lobbyId}
+          MaxPlayers={5}
+          MinPlayers={2}
+          LobbyUsers={lobby.players.map(
+            ({ playerName, lobbyPlaceId, userId }) => ({
+              Username: playerName,
+              LobbyPlace: lobbyPlaceId,
+              UserId: userId,
+            })
+          )}
+          IsCreator={isCreator}
+        ></LobbyManager>
+      </div>
+    );
+  }
+
   return (
     <div>
-      <table>
+      <table className="yahtzee-container">
         <tbody>
           <tr id="yahtzee-player_container">
             <th></th>
-            {players.map((player, index) => {
+            {lobby.players.map((player, index) => {
               return (
                 <th
-                  style={{
-                    color: player.hasRound ? "white" : "grey",
-                    padding: "20px",
-                  }}
-                  key={"player_" + index}
+                  key={`yahtzee_player_cell_${player.playerName}`}
+                  style={{ width: "150px" }}
                 >
-                  {player.playerName} / {player.points}
+                  <div
+                    style={{
+                      color: player.hasRound ? "white" : "var(--color-grey)",
+                      padding: "20px",
+                      height: "50px",
+                      maxWidth: "150px",
+                      overflow: "hidden",
+                    }}
+                    key={"player_" + index}
+                  >
+                    {player.playerName}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: "small",
+                    }}
+                  >
+                    <span
+                      style={{
+                        color: player.hasRound ? "white" : "var(--color-grey)",
+                      }}
+                    >
+                      Points: {player.points} |{" "}
+                    </span>
+                    <span
+                      style={{
+                        color: player.hasRound ? "white" : "var(--color-grey)",
+                      }}
+                    >
+                      {new Date((playerTimes as any)[player.userId] * 1000)
+                        .toISOString()
+                        .substring(14, 19)}
+                    </span>
+                  </div>
                 </th>
               );
             })}
           </tr>
           {cells.map((x, index) => {
             return (
-              <tr title={x.description} key={`cell ${index}`}>
+              <tr title={x.description} key={`cell_${index}`}>
                 <td>{x.name}</td>
-                {pointCells.map((cell, index) => {
+                {lobby.playerCells.map((cell, index) => {
                   return (
                     <td
                       key={"kk_" + index}
                       onClick={() => OnPointSet(x.pointType)}
-                      className={GetCellClass(cell.playerName, x.pointType)}
+                      className={GetCellClass(
+                        lobby.playerCells,
+                        cell.userId,
+                        x.pointType
+                      )}
                     >
-                      {GetCell(cell.playerName, x.pointType)}
+                      {GetCell(cell.userId, x.pointType)}
                     </td>
                   );
                 })}
@@ -570,7 +448,7 @@ export const Yahtzee = () => {
         </tbody>
       </table>
       <div className="dice-form">
-        {gameStarted &&
+        {lobby.gameStarted &&
           !gameEnded &&
           dices.map((dice, index) => {
             dice.index = index;
@@ -590,7 +468,7 @@ export const Yahtzee = () => {
           <h3>Game Ended</h3>
           <h3>Winner: {endgameScreen?.winnerUsername}</h3>
           <h3>
-            Won:{" "}
+            Won:
             <span style={{ color: "var(--color-yellow)" }}>
               {Math.round(endgameScreen?.coinsGotten as number)}$
             </span>
@@ -598,12 +476,12 @@ export const Yahtzee = () => {
         </div>
       )}
       <div className="roll-btn">
-        {hasRound && gameStarted && !gameEnded && (
+        {hasRound && lobby.gameStarted && !gameEnded && (
           <button onClick={() => setRollState(isRolling ? false : true)}>
             Rolls ({rollCount})
           </button>
         )}
-        {!gameStarted && isCreator && (
+        {!lobby.gameStarted && lobby.isCreator && (
           <button onClick={StartGame}>Start Game</button>
         )}
       </div>

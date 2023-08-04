@@ -1,7 +1,7 @@
 ﻿namespace PuzonnsThings.Models.Yahtzee;
 
 [Serializable]
-public class YahtzeeOnPointSetModel
+public sealed class YahtzeeOnPointSetModel
 {
     public bool IsSuccessFul { get; set; }
     public int Points { get; set; }

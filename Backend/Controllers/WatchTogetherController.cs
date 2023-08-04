@@ -1,13 +1,12 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
 using PuzonnsThings.Databases;
 using PuzonnsThings.Models;
 using PuzonnsThings.Models.WatchTogether;
 using PuzonnsThings.Services;
-using TodoApp.Repositories;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using PuzonnsThings.Repositories;
 
 namespace PuzonnsThings.Controllers;
 

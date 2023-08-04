@@ -1,12 +1,12 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using PuzonnsThings.Hubs.Extensions;
+using PuzonnsThings.Models.Casino;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using PuzonnsThings.Models;
-using TodoApp.Repositories;
 using PuzonnsThings.Services;
-using Backend.Models.Casino;
-using Backend.Hubs.Extensions;
+using PuzonnsThings.Repositories;
 
-namespace Backend.Hubs;
+namespace PuzonnsThings.Hubs.Wheel;
 
 [Authorize]
 public class WheelHub : Hub
@@ -30,15 +30,15 @@ public class WheelHub : Hub
             return WheelBetCallbackModel.Unsuccessful;
         }
 
-        if(user.Coins >= bet.Amount)
+        if (user.Coins >= bet.Amount)
         {
-            if(!wheelService.AddBet(user.Id, bet.WheelPoint, bet.Amount))
+            if (!wheelService.AddBet(user.Id, bet.WheelPoint, bet.Amount))
             {
                 return WheelBetCallbackModel.Unsuccessful;
             }
 
             user.Coins -= bet.Amount;
-            await userRepository.UpdateUserAsync(user);
+            userRepository.UpdateUserAsync(user);
 
             WheelBetCallbackModel callback = new WheelBetCallbackModel()
             {
@@ -75,7 +75,7 @@ public class WheelHub : Hub
                 continue;
             }
 
-            foreach(var bet in client.BettedPoints)
+            foreach (var bet in client.BettedPoints)
             {
                 if (bet.Value > 0)
                 {
@@ -91,9 +91,9 @@ public class WheelHub : Hub
 
         List<WheelBetOnPlayerBetModel> userBets = new List<WheelBetOnPlayerBetModel>(4);
 
-        foreach(var bet in wheelService.Clients.Values.Where(x=>x.UserId == user.Id).First().BettedPoints)
+        foreach (var bet in wheelService.Clients.Values.Where(x => x.UserId == user.Id).First().BettedPoints)
         {
-            if(bet.Value > 0)
+            if (bet.Value > 0)
             {
                 userBets.Add(new WheelBetOnPlayerBetModel()
                 {

@@ -1,4 +1,4 @@
-﻿namespace Backend.Models.Lobbies;
+﻿namespace PuzonnsThings.Models.Lobbies;
 
 public enum LobbyStatus
 {

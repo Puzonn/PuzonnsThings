@@ -5,6 +5,8 @@ import { UserContext } from "./UserContext";
 import MenuIcon from "../Icons/icon_menu.svg";
 import LoginIcon from "../Icons/icon_login.svg";
 import LogoutIcon from "../Icons/icon_logout.svg";
+import GithubIcon from "../Icons/github-mark-white.png";
+import HomeIcon from "../Icons/icon-home.svg";
 
 export const NavBar = () => {
   const { isLoggedIn } = useContext(AuthContext);
@@ -13,8 +15,6 @@ export const NavBar = () => {
   const [showMenuIcon, setShowMenuIcon] = useState<boolean>(false);
 
   const IsMobile = screenWidth <= 768;
-  const MobileShowMenu = IsMobile && showMenuIcon;
-  const ShouldShowMenu = MobileShowMenu || !IsMobile;
 
   const HandleLogout = () => {
     Cookies.remove("Bearer");
@@ -128,22 +128,40 @@ export const NavBar = () => {
         <a href="/home" id="nav-home-btn">
           PuzonnThings
         </a>
-        <a href="/">Home</a>
-        <a href="/contact">Contact & Informations</a>
+        <a href="/">
+          <button style={{position: 'relative'}}>
+            <img className="nav-img-icon" src={HomeIcon}/> Home
+          </button>
+        </a>
+        <a href="/contact">
+          <button>Info & Contact</button>
+        </a>
+        <a
+          className="nav-rev"
+          href="https://github.com/Puzonn/PuzonnsThings"
+          target="_blank"
+        >
+          <button style={{ position: "relative" }}>
+            <img className="nav-img-icon" src={GithubIcon} />
+            Github
+          </button>
+        </a>
       </nav>
       <div>
         {isLoggedIn && (
           <div>
             <span className="nav-item">
-              {Username} {Coins} <span style={{color: 'var(--color-yellow)'}}>$</span>
+              {Username} {Coins}{" "}
+              <span style={{ color: "var(--color-yellow)" }}>$</span>
             </span>
             <button onClick={HandleLogout}>Logout</button>
           </div>
         )}
         {!isLoggedIn && (
           <div className="nav-menu-context-grid">
-            <img src={LoginIcon} />
-            <a href="/login">Login</a>
+            <a href="/login">
+              <button className="nav-menu-login-btn">Login</button>
+            </a>
           </div>
         )}
       </div>

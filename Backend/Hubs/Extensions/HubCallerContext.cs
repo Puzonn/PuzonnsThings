@@ -2,9 +2,9 @@
 using PuzonnsThings.Models;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using TodoApp.Repositories;
+using PuzonnsThings.Repositories;
 
-namespace Backend.Hubs.Extensions;
+namespace PuzonnsThings.Hubs.Extensions;
 
 public static class HubUserContext
 {

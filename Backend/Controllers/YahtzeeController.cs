@@ -1,12 +1,10 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using PuzonnsThings.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
 using PuzonnsThings.Databases;
 using PuzonnsThings.Models;
-using TodoApp.Repositories;
-using Backend.Repositories;
-using Backend.Models.Lobbies;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 
 namespace PuzonnsThings.Controllers;
 
@@ -15,10 +13,10 @@ namespace PuzonnsThings.Controllers;
 public class YahtzeeController : ControllerBase
 {
     private readonly DatabaseContext _context;
-    private readonly UserRepository _repository;
+    private readonly IUserRepository _repository;
     private readonly LobbyRepository _lobbyRepository;
 
-    public YahtzeeController(DatabaseContext context, UserRepository repository, LobbyRepository lobbyRepository)
+    public YahtzeeController(DatabaseContext context, IUserRepository repository, LobbyRepository lobbyRepository)
     {
         _context = context;
         _repository = repository;

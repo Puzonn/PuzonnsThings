@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
-namespace Backend.Models.Todo;
+namespace PuzonnsThings.Models.Todo;
 
 [Serializable]
 public class TaskModelCreation

@@ -1,8 +1,8 @@
-﻿using Backend.Models.Lobbies;
+﻿using PuzonnsThings.Models.Lobbies;
 using Microsoft.EntityFrameworkCore;
 using PuzonnsThings.Databases;
 
-namespace Backend.Repositories;
+namespace PuzonnsThings.Repositories;
 
 public class LobbyRepository : ILobbyRepository
 {
@@ -15,15 +15,15 @@ public class LobbyRepository : ILobbyRepository
 
     public async Task<LobbyModel> AddLobby(LobbyModel lobby)
     {
-        await dbContext.Lobbies.AddAsync(lobby);   
+        await dbContext.Lobbies.AddAsync(lobby);
         await dbContext.SaveChangesAsync();
 
         return lobby;
     }
 
-    public Task<LobbyModel[]> FetchAllLobbies()
+    public async Task<LobbyModel[]> FetchAllLobbies()
     {
-        return dbContext.Lobbies.Where(x=> !x.LobbyEnded).ToArrayAsync();
+        return await dbContext.Lobbies.Where(x => !x.LobbyEnded).ToArrayAsync();
     }
 
     public Task<LobbyModel[]> FetchLobbies(LobbyType type)
@@ -34,11 +34,6 @@ public class LobbyRepository : ILobbyRepository
     public Task<LobbyModel?> GetLobby(uint lobbyId)
     {
         return dbContext.Lobbies.Where(x => x.Id == lobbyId).FirstOrDefaultAsync();
-    }
-
-    public Task RemoveLobby(LobbyModel lobby)
-    {
-        throw new NotImplementedException();
     }
 
     public async Task RemoveLobby(uint lobbyId)

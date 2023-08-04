@@ -3,11 +3,12 @@ import { createContext } from "react";
 import { Config } from "./Config";
 import { Auth } from "../Auth/Auth";
 
-export const UserContext = createContext<UserContextModel>({Username: '', Coins: 0, setUser: () => {}, fetchUpdated: () => {}});
+export const UserContext = createContext<UserContextModel>({Username: '', Coins: 0, setUser: () => {}, fetchUpdated: () => {}, UserId: -1});
 
 export type UserContextModel =
 {
     Username: string;
+    UserId: number;
     Coins: number;
     setUser: (state: UserContextModel) => void;
     fetchUpdated: () => void;

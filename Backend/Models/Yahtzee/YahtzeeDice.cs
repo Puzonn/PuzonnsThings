@@ -1,7 +1,7 @@
 ﻿namespace PuzonnsThings.Models.Yahtzee;
 
 [Serializable]
-public class YahtzeeDice
+public sealed class YahtzeeDice
 {
     public int Index { get; }
     public int RolledDots { get; set; } = 0;

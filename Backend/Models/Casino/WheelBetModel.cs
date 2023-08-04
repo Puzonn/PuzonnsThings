@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Backend.Models.Casino;
+namespace PuzonnsThings.Models.Casino;
 
 public class WheelBetModel
 {

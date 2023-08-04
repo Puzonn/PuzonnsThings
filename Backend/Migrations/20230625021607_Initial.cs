@@ -2,7 +2,7 @@
 
 #nullable disable
 
-namespace Backend.Migrations
+namespace PuzonnsThings.Migrations
 {
     /// <inheritdoc />
     public partial class Initial : Migration

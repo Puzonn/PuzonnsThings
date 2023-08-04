@@ -1,4 +1,4 @@
-﻿namespace Backend.Models.Casino;
+﻿namespace PuzonnsThings.Models.Casino;
 
 public class WheelClientModel
 {
@@ -40,9 +40,9 @@ public class WheelClientModel
     {
         float sum = 0;
 
-        foreach(var bet in BettedPoints.Keys)
+        foreach (var bet in BettedPoints.Keys)
         {
-            if(bet == winPoint)
+            if (bet == winPoint)
             {
                 sum += BettedPoints[bet];
             }

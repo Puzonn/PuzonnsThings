@@ -12,7 +12,7 @@ export const Lobbies = () => {
   const [params] = useSearchParams();
   const { isLoggedIn } = useContext(AuthContext);
   const [fetchError, setFetchError] = useState("");
-  const [queryTypeSelector, setQueryTypeSelector] = useState('');
+  const [queryTypeSelector, setQueryTypeSelector] = useState("");
 
   const FetchLobbies = (queryType: string) => {
     axios
@@ -50,7 +50,7 @@ export const Lobbies = () => {
     if (typeof queryType !== "undefined" && queryType !== null) {
       FetchLobbies(queryType);
 
-      setQueryTypeSelector(queryType)
+      setQueryTypeSelector(queryType);
       return;
     }
 
@@ -112,7 +112,7 @@ export const Lobbies = () => {
 
   const OnTypeChange = (event: any) => {
     const queryType = event.target.value;
-    setQueryTypeSelector(queryType)
+    setQueryTypeSelector(queryType);
     window.history.pushState("", "", `/lobbies?type=${queryType}`);
 
     FetchLobbies(queryType);
@@ -173,9 +173,8 @@ export const Lobbies = () => {
         <div style={{ textAlign: "center" }}>
           <h2>{fetchError}</h2>
           <span style={{ color: "var(--color-grey)" }}>
-            You can create lobby by clicking on{" "}
-            <span style={{ color: "var(--color-green)" }}> green button </span>{" "}
-            !
+            You can create lobby by clicking
+            <span style={{ color: "var(--color-green)" }}> green button </span>!
           </span>
         </div>
       )}

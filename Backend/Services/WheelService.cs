@@ -1,7 +1,6 @@
-﻿using Backend.Hubs;
-using Backend.Models.Casino;
+﻿using PuzonnsThings.Hubs.Wheel;
+using PuzonnsThings.Models.Casino;
 using Microsoft.AspNetCore.SignalR;
-using System.Drawing;
 using System.Timers;
 using Timer = System.Timers.Timer;
 
@@ -19,7 +18,7 @@ public class WheelService
 
     public void AddOrUpdatePlayer(string username, string connectionId, int userId)
     {
-        if(Clients.ContainsKey(userId))
+        if (Clients.ContainsKey(userId))
         {
             Clients[userId].ConnectionId = connectionId;
         }
@@ -31,7 +30,7 @@ public class WheelService
 
     public bool AddBet(int userId, WheelPointType point, float amount)
     {
-        if(Clients[userId].HasBetted(point))
+        if (Clients[userId].HasBetted(point))
         {
             return false;
         }
@@ -88,13 +87,13 @@ public class WheelService
 
                 OnRoll();
             }
-            SecondsToSpin = TimeToBet+TimeToSpin;
+            SecondsToSpin = TimeToBet + TimeToSpin;
         }
     }
 
     public void OnRoll()
     {
-        foreach(var client in Clients.Values)
+        foreach (var client in Clients.Values)
         {
             client.ClearBets();
         }

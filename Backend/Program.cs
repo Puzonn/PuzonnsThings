@@ -1,19 +1,24 @@
+using PuzonnsThings.Hubs.WatchTogether;
+using PuzonnsThings.Hubs.Wheel;
+using PuzonnsThings.Hubs.Yahtzee;
+using PuzonnsThings.Repositories;
+using PuzonnsThings.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
+using PuzonnsThings.Databases;
+using PuzonnsThings.Services;
 using System.Diagnostics;
 using System.Text;
-using PuzonnsThings.Databases;
-using PuzonnsThings.Hubs;
-using PuzonnsThings.Services;
-using TodoApp.Repositories;
-using Backend.Hubs;
-using Backend.Repositories;
-using Backend.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Logging.Configure(context =>
+{
+});
 
 builder.Services.AddMvc((options) =>
 {
@@ -106,16 +111,19 @@ builder.Services.AddControllers();
 
 builder.Services.AddDbContext<DatabaseContext>(x =>
 {
-    x.UseSqlite(builder.Configuration["ConnectionStrings:Db"]);
+    x.UseSqlite(builder.Configuration["ConnectionStrings:Db"]).LogTo((x) =>
+    {
+
+    });
 });
 
-builder.Services.AddScoped<YahtzeeLobbyService>();
+builder.Services.AddScoped<YahtzeeService>();
 builder.Services.AddSingleton<WheelService>();
 builder.Services.AddSingleton<MemoryLobbyCollector>();
 
 builder.Services.AddScoped<WatchTogetherService>();
-builder.Services.AddScoped<UserRepository>();
-builder.Services.AddScoped<LobbyRepository>();  
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<LobbyRepository>();
 
 var app = builder.Build();
 

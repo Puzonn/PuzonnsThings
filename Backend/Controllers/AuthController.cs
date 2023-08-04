@@ -2,12 +2,12 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
 using PuzonnsThings.Databases;
 using PuzonnsThings.Models;
 using PuzonnsThings.Models.Auth;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 
 namespace PuzonnsThings.Controllers;
 

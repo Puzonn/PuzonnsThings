@@ -1,4 +1,4 @@
-﻿namespace Backend.Models.Lobbies;
+﻿namespace PuzonnsThings.Models.Lobbies;
 
 [Serializable]
 public class LobbyModel
@@ -10,5 +10,5 @@ public class LobbyModel
     public required LobbyStatus Status { get; set; }
     public required int CreatorUserId { get; set; }
     public bool LobbyEnded { get; set; } = false;
-    public uint Id { get; set; }   
+    public uint Id { get; set; }
 }

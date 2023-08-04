@@ -6,7 +6,7 @@ using PuzonnsThings.Databases;
 
 #nullable disable
 
-namespace Backend.Migrations
+namespace PuzonnsThings.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
     partial class DatabaseContextModelSnapshot : ModelSnapshot
@@ -16,7 +16,7 @@ namespace Backend.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "7.0.4");
 
-            modelBuilder.Entity("Backend.Models.Lobbies.LobbyModel", b =>
+            modelBuilder.Entity("PuzonnsThings.Models.Lobbies.LobbyModel", b =>
                 {
                     b.Property<uint>("Id")
                         .ValueGeneratedOnAdd()

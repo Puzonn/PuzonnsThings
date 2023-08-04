@@ -1,25 +1,21 @@
-﻿using Backend.Models;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using PuzonnsThings.Databases;
 using PuzonnsThings.Models;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using TodoApp.Repositories;
+using PuzonnsThings.Repositories;
 
-namespace Backend.Controllers;
+namespace PuzonnsThings.Controllers;
 
 [ApiController]
 [Authorize]
 public class UsersController : ControllerBase
 {
-    private readonly DatabaseContext _context;
-    private readonly UserRepository _userRepository;
+    private readonly IUserRepository _userRepository;
 
-    public UsersController(DatabaseContext context, UserRepository repository)
+    public UsersController(IUserRepository repository)
     {
-        _context = context;
         _userRepository = repository;
     }
 
@@ -36,7 +32,7 @@ public class UsersController : ControllerBase
         ApiUser apiUser = new ApiUser()
         {
             Coins = user.Coins,
-            Id = user.Id,
+            UserId = user.Id,
             Username = user.Username
         };
 
@@ -56,7 +52,7 @@ public class UsersController : ControllerBase
         ApiUser apiUser = new ApiUser()
         {
             Coins = user.Coins,
-            Id = user.Id,
+            UserId = user.Id,
             Username = user.Username
         };
 

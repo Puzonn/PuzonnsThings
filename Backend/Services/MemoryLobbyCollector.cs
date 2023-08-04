@@ -1,9 +1,7 @@
-﻿using Backend.Models;
-using Backend.Repositories;
-using Microsoft.EntityFrameworkCore.Storage;
-using PuzonnsThings.Databases;
+﻿using PuzonnsThings.Models;
+using PuzonnsThings.Repositories;
 
-namespace Backend.Services;
+namespace PuzonnsThings.Services;
 
 public class MemoryLobbyCollector
 {
@@ -27,24 +25,24 @@ public class MemoryLobbyCollector
             DateTime now = DateTime.UtcNow;
             List<ILobbyCollectable> collectedLobbies = new List<ILobbyCollectable>();
 
-            foreach (var lobby in _lobbyCollectables) 
+            foreach (var lobby in _lobbyCollectables)
             {
-                if(lobby.ActivePlayers == 0)
+                if (lobby.ActivePlayers == 0)
                 {
-                    if(lobby.LastLobbySnapshot - now > TimeSpan.FromSeconds(CheckTime))
+                    if (lobby.LastLobbySnapshot - now > TimeSpan.FromSeconds(CheckTime))
                     {
                         collectedLobbies.Add(lobby);
                     }
                 }
             }
 
-            if(collectedLobbies.Count > 0)
+            if (collectedLobbies.Count > 0)
             {
                 using (var scope = serviceProvider.CreateAsyncScope())
                 {
                     var lobbyRepository = scope.ServiceProvider.GetService<LobbyRepository>();
 
-                    if(lobbyRepository is null)
+                    if (lobbyRepository is null)
                     {
                         throw new Exception("Impossible dbContext null");
                     }

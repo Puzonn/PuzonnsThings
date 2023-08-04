@@ -1,13 +1,12 @@
+using PuzonnsThings.Models.Todo;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using PuzonnsThings.Databases;
+using PuzonnsThings.Models;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using PuzonnsThings.Databases;
-using PuzonnsThings.Models.Todo;
-using PuzonnsThings.Models;
-using TodoApp.Repositories;
-using Backend.Models.Todo;
+using PuzonnsThings.Repositories;
 
 namespace PuzonnsThings.Controllers;
 
@@ -16,12 +15,12 @@ namespace PuzonnsThings.Controllers;
 public class TodoController : ControllerBase
 {
     private readonly DatabaseContext dbContext;
-    private readonly UserRepository _respository;
+    private readonly IUserRepository userRepository;
 
-    public TodoController(DatabaseContext context, UserRepository respository)
+    public TodoController(DatabaseContext context, IUserRepository _userRepository)
     {
         dbContext = context;
-        _respository = respository;
+        userRepository = _userRepository;
     }
 
     [HttpPost("/api/[controller]/create")]
@@ -115,7 +114,7 @@ public class TodoController : ControllerBase
 
         dbContext.TodoList.Update(task);
 
-        await dbContext.SaveChangesAsync(); 
+        await dbContext.SaveChangesAsync();
 
         return Ok(task);
     }
@@ -129,6 +128,6 @@ public class TodoController : ControllerBase
             return null;
         }
 
-        return await _respository.GetByIdAsync(int.Parse(userId.Value));
+        return await userRepository.GetByIdAsync(int.Parse(userId.Value));
     }
 }

@@ -1,7 +1,7 @@
 ﻿using PuzonnsThings.Databases;
 using PuzonnsThings.Models;
 
-namespace TodoApp.Repositories;
+namespace PuzonnsThings.Repositories;
 
 public class UserRepository : IUserRepository
 {
@@ -20,13 +20,13 @@ public class UserRepository : IUserRepository
     public async Task CreateUserAsync(User user)
     {
         await _dbContext.Users.AddAsync(user);
-        await _dbContext.SaveChangesAsync();
     }
 
-    public async Task UpdateUserAsync(User user)
+    public async void UpdateUserAsync(User user)
     {
         _dbContext.Users.Update(user);
-        await _dbContext.SaveChangesAsync();
+
+        await SaveChangesAsync();
     }
 
     public async Task DeleteUserAsync(int id)
@@ -36,7 +36,6 @@ public class UserRepository : IUserRepository
         if (user != null)
         {
             _dbContext.Users.Remove(user);
-            await _dbContext.SaveChangesAsync();
         }
     }
 
@@ -50,9 +49,8 @@ public class UserRepository : IUserRepository
         }
 
         user.Coins += coins;
-
         _dbContext.Update(user);
-
-        await _dbContext.SaveChangesAsync();
     }
+
+    public async Task SaveChangesAsync() => await _dbContext.SaveChangesAsync();
 }

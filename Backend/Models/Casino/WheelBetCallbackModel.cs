@@ -1,4 +1,4 @@
-﻿namespace Backend.Models.Casino;
+﻿namespace PuzonnsThings.Models.Casino;
 
 public class WheelBetCallbackModel
 {
@@ -6,5 +6,5 @@ public class WheelBetCallbackModel
     public required float Amount { get; set; }
 
     public static readonly WheelBetCallbackModel Unsuccessful =
-        new WheelBetCallbackModel() { Amount = 0, Success = false}; 
+        new WheelBetCallbackModel() { Amount = 0, Success = false };
 }

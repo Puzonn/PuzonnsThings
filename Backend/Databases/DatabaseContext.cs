@@ -1,4 +1,4 @@
-﻿using Backend.Models.Lobbies;
+﻿using PuzonnsThings.Models.Lobbies;
 using Microsoft.EntityFrameworkCore;
 using PuzonnsThings.Models;
 using PuzonnsThings.Models.Todo;
@@ -9,7 +9,7 @@ public class DatabaseContext : DbContext
 {
     public DatabaseContext(DbContextOptions<DatabaseContext> options) : base(options)
     {
-        
+
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

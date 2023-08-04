@@ -19,6 +19,7 @@ export function App() {
   const [loggedUser, setUser] = useState<UserContextModel>({
     Username: "",
     Coins: 0,
+    UserId: -1,
     setUser: () => {},
     fetchUpdated: () => {},
   });
@@ -38,6 +39,7 @@ export function App() {
             ...user,
             Username: data.username,
             Coins: data.coins,
+            UserId: data.userId
           }));
         });
 
@@ -54,6 +56,7 @@ export function App() {
         value={{
           Username: loggedUser.Username,
           Coins: loggedUser.Coins,
+          UserId: loggedUser.UserId,
           setUser: loggedUser.setUser,
           fetchUpdated: loggedUser.fetchUpdated,
         }}

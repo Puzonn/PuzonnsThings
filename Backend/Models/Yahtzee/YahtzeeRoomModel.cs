@@ -1,7 +1,7 @@
 ﻿namespace PuzonnsThings.Models.Yahtzee;
 
 [Serializable]
-public class YahtzeeRoomModel
+public sealed class YahtzeeRoomModel
 {
     public int Id { get; set; }
     public string Creator { get; set; }

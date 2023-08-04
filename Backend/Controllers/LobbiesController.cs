@@ -1,24 +1,21 @@
-﻿using Backend.Models.Lobbies;
-using Backend.Repositories;
+﻿using PuzonnsThings.Models.Lobbies;
+using PuzonnsThings.Repositories;
 using Microsoft.AspNet.SignalR;
 using Microsoft.AspNetCore.Mvc;
-using PuzonnsThings.Hubs;
 using PuzonnsThings.Models;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using TodoApp.Repositories;
-using PuzonnsThings.Models.Yahtzee;
 
-namespace Backend.Controllers;
+namespace PuzonnsThings.Controllers;
 
 [Authorize]
 [ApiController]
 public class LobbiesController : ControllerBase
 {
     private readonly LobbyRepository repository;
-    private readonly UserRepository userRepository;
+    private readonly IUserRepository userRepository;
 
-    public LobbiesController(LobbyRepository _repository, UserRepository _userRepository)
+    public LobbiesController(LobbyRepository _repository, IUserRepository _userRepository)
     {
         repository = _repository;
         userRepository = _userRepository;
@@ -42,12 +39,12 @@ public class LobbiesController : ControllerBase
     {
         User? user = await GetUser();
 
-        if(user is null)
+        if (user is null)
         {
             return Forbid("User is not logged in");
         }
 
-        if(lobbyType == LobbyTypes.Yahtzee.ApiName)
+        if (lobbyType == LobbyTypes.Yahtzee.ApiName)
         {
             LobbyModel model = new LobbyModel()
             {
@@ -68,11 +65,16 @@ public class LobbiesController : ControllerBase
     }
 
     [HttpGet("/api/[controller]/fetch")]
-    public Task<LobbyModel[]> FetchAllLobbies()
+    public async Task<LobbyModel[]> FetchAllLobbies()
     {
-        return repository.FetchAllLobbies();
+        return await repository.FetchAllLobbies();
     }
 
+    [HttpGet("/api/[controller]/count/{type}")]
+    public async Task GetLobbysCount(string type)
+    {
+
+    }
 
     private async Task<User?> GetUser()
     {

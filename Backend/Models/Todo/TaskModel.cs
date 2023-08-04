@@ -12,7 +12,7 @@ public class TaskModel
     public int TaskProgressId { get; set; }
 
     [JsonPropertyName("TaskPriority")]
-    public int TaskPriority { get; set; }   
+    public int TaskPriority { get; set; }
 
     [JsonPropertyName("TaskEndDateTime")]
     public string TaskEndDateTime { get; set; }

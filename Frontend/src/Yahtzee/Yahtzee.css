@@ -9,7 +9,19 @@
   margin: 30px;
 }
 
-td {
+.yahtzee-container {
+  border-collapse: collapse;
+}
+
+.yahtzee-container td {
+  border-right: solid 1px white;
+}
+
+​ .yahtzee-container table tr:last-child {
+  border-bottom: none;
+}
+
+.yahtzee-container td {
   text-align: center;
   padding: 10px;
 }

@@ -1,7 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
-using PuzonnsThings.Databases;
-using PuzonnsThings.Models.WatchTogether;
+﻿using PuzonnsThings.Databases;
 using PuzonnsThings.Models;
+using PuzonnsThings.Models.WatchTogether;
 
 namespace PuzonnsThings.Services;
 

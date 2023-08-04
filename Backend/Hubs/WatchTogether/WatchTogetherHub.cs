@@ -1,15 +1,14 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
-using Microsoft.EntityFrameworkCore;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
 using PuzonnsThings.Databases;
 using PuzonnsThings.Models;
 using PuzonnsThings.Models.WatchTogether;
 using PuzonnsThings.Services;
-using TodoApp.Repositories;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using PuzonnsThings.Repositories;
 
-namespace PuzonnsThings.Hubs;
+namespace PuzonnsThings.Hubs.WatchTogether;
 
 [Authorize]
 public class WatchTogetherHub : Hub
@@ -24,7 +23,7 @@ public class WatchTogetherHub : Hub
     {
         _dbContext = context;
         _watchTogetherService = watchTogetherService;
-        _repository = respository; 
+        _repository = respository;
     }
 
     public async Task JoinRoom(int roomId)
