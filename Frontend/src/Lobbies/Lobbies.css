@@ -4,7 +4,7 @@
 }
 
 #lobbies tbody tr > td {
-  padding: 20px
+  padding: 20px;
 }
 
 #lobbies-selector {
@@ -74,4 +74,72 @@
   border: none;
   outline: none;
   width: 200px;
+}
+
+.lobby-players {
+  height: 90px;
+  width: 220px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lobby-player_avatar-container {
+  padding-left: 6px;
+}
+
+.lobby-player_avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background-color: #275a28;
+}
+
+.lobby-players_count {
+  padding-left: 6px;
+  font-weight: bold;
+  font-size: larger;
+}
+
+.lobby-players_count-free {
+  color: #7fd919;
+}
+
+.lobby-players_count-full {
+  color: #ff4041;
+}
+
+.lobby-join_btn {
+  width: 200px;
+  height: 40px;
+  font-size: 1em;
+  font-weight: bold;
+  margin: 0px;
+  border: 1px solid #77ff9d;
+  background-color: #18331f;
+}
+
+.lobby-join_full_btn {
+  margin: 0px;
+  width: 200px;
+  height: 40px;
+  font-size: 1em;
+  font-weight: bold;
+  border: 1px solid #6a6d81;
+  background-color: #1f1e27;
+}
+
+.lobby-join_login_btn {
+  width: 200px;
+  height: 40px;
+  font-size: 1em;
+  font-weight: bold;
+  margin: 0px;
+  border: 1px solid white;
+  background-color: #1f1e27;
+}
+
+.lobby-join_login_btn a {
+  text-decoration: none;
+  color: white;
 }

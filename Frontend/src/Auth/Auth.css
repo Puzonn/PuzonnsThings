@@ -1,14 +1,20 @@
-button {
+#login-container button {
   width: 200px;
   height: 40px;
   color: white;
   background: #ffffff08;
+  margin: 3px 0;
   font-size: 1em;
   font-weight: bold;
   margin-top: 20px;
   outline: none;
   border: none;
   border-radius: 5px;
+}
+
+#login-container input {
+  padding-left: 5px;
+  margin: 5px;
 }
 
 #login-form h2 {

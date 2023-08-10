@@ -69,7 +69,7 @@ export const Register = () => {
         <div>
           <a style={{ color: "red" }}>{error}</a>
         </div>
-        <a href="/login">
+        <a style={{color: 'white'}} href="/login">
           Already have account? <span style={{textDecoration: 'underline'}}>Click here</span>
         </a>
         <p id="register-email_info">

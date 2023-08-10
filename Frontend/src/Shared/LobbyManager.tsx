@@ -2,6 +2,9 @@ import { ILobbyOptions, LobbyUser } from "../Types/LobbyManagerTypes";
 import "./LobbyManager.css";
 import { useEffect, useState, useContext } from "react";
 import KickIcon from "../Icons/icon_close.svg";
+import PlayersIcon from "../Icons/icon_players.png";
+import PrivacyIcon from "../Icons/icon_privacy.png";
+import ClockIcon from "../Icons/icon_clock.png";
 import { UserContext } from "./UserContext";
 
 export const LobbyManager = ({
@@ -14,29 +17,21 @@ export const LobbyManager = ({
   MaxPlayers,
   StartReadyState,
   LobbyOptions,
+  PrivacyOption,
   OnStartClick,
   MinPlayers,
 }: ILobbyOptions) => {
   const { UserId } = useContext(UserContext);
-  const [maxPlayers, setMaxPlayers] = useState(MinPlayers);
   const [lobbyUsers, setLobbyUsers] = useState<LobbyUser[]>([]);
   const [navSelected, setNavSelected] = useState(0);
 
   const ShouldShowPlayers = navSelected === 0;
   const ShouldShowOptions = navSelected === 1;
   const ShouldShowStartButton = IsCreator && StartReadyState;
-  
+
   useEffect(() => {
     setLobbyUsers(LobbyUsers);
-
-    if (LobbyOptions.maxPlayersCount !== -1) {
-      setMaxPlayers(LobbyOptions.maxPlayersCount);
-    }
   });
-
-  const OptionsChangeMaxPlayers = (count: number) => {
-    OnChangeMaxPlayersState(count);
-  };
 
   const ChoosePlaceState = (place: number) => {
     const hasPlace = lobbyUsers.find((x) => x.UserId === UserId);
@@ -49,7 +44,7 @@ export const LobbyManager = ({
     <div style={{ maxWidth: "400px" }}>
       <div className="mg_lobby_place_container">
         <div>
-          {[...Array(maxPlayers)].map((val, index) => {
+          {[...Array(MaxPlayers)].map((val, index) => {
             const lobbyUser = lobbyUsers.find((x) => x.LobbyPlace === index);
             const shouldRenderKick = IsCreator || lobbyUser?.UserId === UserId;
             return (
@@ -134,38 +129,118 @@ export const LobbyManager = ({
             )}
             {ShouldShowOptions && (
               <div className="mg_lobby_options">
-                <p style={{ fontSize: "12px", color: "var(--color-grey)" }}>
-                  Any changes will restart the lobby
-                </p>
-                <span>Max Players</span>
-                <select
-                  className="mg_lobby_players-input"
-                  value={maxPlayers}
-                  onChange={(event) => {
-                    OptionsChangeMaxPlayers(parseInt(event.target.value));
-                  }}
-                >
-                  {[...Array(MaxPlayers - 1)].map((val, index) => {
-                    return (
-                      <option
-                        value={index == 0 ? MinPlayers : index + MinPlayers}
-                        key={`mg_max_players_${index}`}
-                      >
-                        {index == 0 ? MinPlayers : index + MinPlayers}
-                      </option>
-                    );
-                  })}
-                </select>
-                <span>Game Time</span>
-                <select className="mg_lobby_players-input">
-                  {[...Array(MaxPlayers)].map((val, index) => {
-                    return (
-                      <option key={`mg_game_time${index}`}>
-                        {index == 0 ? 1 : index * 3} min
-                      </option>
-                    );
-                  })}
-                </select>
+                <div>
+                  <div className="mg_lobby_options-name-container">
+                    <img src={PlayersIcon} />
+                    <span>Max Players</span>
+                  </div>
+                  <div className="mg_lobby_options_container">
+                    <button
+                      onClick={() => OnChangeMaxPlayersState(2)}
+                      className={
+                        "mg_lobby_options-option " +
+                        (MaxPlayers == 2
+                          ? "mg_lobby_options-options-selected"
+                          : "")
+                      }
+                    >
+                      2 Players
+                    </button>
+                    <button
+                      onClick={() => OnChangeMaxPlayersState(3)}
+                      style={{ marginLeft: "10px" }}
+                      className={
+                        "mg_lobby_options-option " +
+                        (MaxPlayers == 3
+                          ? "mg_lobby_options-options-selected"
+                          : "")
+                      }
+                    >
+                      3 Players
+                    </button>
+                    <button
+                      onClick={() => OnChangeMaxPlayersState(4)}
+                      style={{ marginLeft: "10px" }}
+                      className={
+                        "mg_lobby_options-option " +
+                        (MaxPlayers == 4
+                          ? "mg_lobby_options-options-selected"
+                          : "")
+                      }
+                    >
+                      4 Players
+                    </button>
+                  </div>
+                </div>
+                <div>
+                  <div className="mg_lobby_options-name-container">
+                    <img src={PrivacyIcon} />
+                    <span>Privacy</span>
+                  </div>
+                  <div className="mg_lobby_options_container">
+                    <button
+                      className={
+                        "mg_lobby_options-option " +
+                        (PrivacyOption == false
+                          ? "mg_lobby_options-options-selected"
+                          : "")
+                      }
+                    >
+                      Public
+                    </button>
+                    <button
+                      style={{ marginLeft: "10px" }}
+                      className={
+                        "mg_lobby_options-option " +
+                        (PrivacyOption == true
+                          ? "mg_lobby_options-options-selected"
+                          : "")
+                      }
+                    >
+                      Private
+                    </button>
+                  </div>
+                </div>
+                <div>
+                  <div className="mg_lobby_options-name-container">
+                    <img src={ClockIcon} />
+                    <span>Game Time</span>
+                  </div>
+                  <div className="mg_lobby_options_container">
+                    <button
+                      className={
+                        "mg_lobby_options-option " +
+                        (PrivacyOption == false
+                          ? "mg_lobby_options-options-selected"
+                          : "")
+                      }
+                    >
+                      30 Seconds
+                    </button>
+                    <button
+                      style={{ marginLeft: "10px" }}
+                      className={
+                        "mg_lobby_options-option " +
+                        (PrivacyOption == true
+                          ? "mg_lobby_options-options-selected"
+                          : "")
+                      }
+                    >
+                      60 Seconds
+                    </button>
+                    <button
+                      style={{ marginLeft: "10px" }}
+                      className={
+                        "mg_lobby_options-option " +
+                        (PrivacyOption == true
+                          ? "mg_lobby_options-options-selected"
+                          : "")
+                      }
+                    >
+                      2 Minutes
+                    </button>
+                  </div>
+                </div>
               </div>
             )}
           </div>

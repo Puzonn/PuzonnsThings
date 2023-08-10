@@ -89,6 +89,11 @@ public class YahtzeeHub : Hub
         Context.Abort();
     }
 
+    /// <summary>
+    /// Handles user joins into lobby
+    /// </summary>
+    /// <param name="roomId">Id of the room</param>
+    /// <returns>True if user is authorized and rooms exists</returns>
     public async Task<bool> Join(uint roomId)
     {
         User? user = await GetUser();
@@ -109,7 +114,7 @@ public class YahtzeeHub : Hub
 
         if (!LobbyService.HasPlayer(user.Id))
         {
-            LobbyService.AddPlayer(user.Id, new YahtzeePlayer(user.Username, Context.ConnectionId, user.Id));
+            LobbyService.AddPlayer(user.Id, new YahtzeePlayer(user.Username, user.Avatar, Context.ConnectionId, user.Id));
         }
 
         YahtzeePlayer player = LobbyService.GetPlayer(user.Id);
@@ -135,7 +140,7 @@ public class YahtzeeHub : Hub
 
             if (!lobby.IsInitialized && lobby is not null)
             {
-                if (player.UserId == lobby.CreatorId)
+                if (player.UserId == lobby.LobbyCreatorId)
                 {
                     lobby.Initialize(player);
                 }
@@ -144,7 +149,7 @@ public class YahtzeeHub : Hub
                 {
                     Dices = player.Dices,
                     Points = player.Points,
-                    SettedPoints = player.SettedPoints,
+                    PlacedPoints = player.PlacedPoints,
                     HasRound = true,
                     GameStarted = false,
                     IsCreator = true,
@@ -166,13 +171,13 @@ public class YahtzeeHub : Hub
                         {
                             Dices = lobbyPlayer.Dices,
                             Points = lobbyPlayer.Points,
-                            SettedPoints = lobbyPlayer.SettedPoints,
+                            PlacedPoints = lobbyPlayer.PlacedPoints,
                             HasRound = lobby.PlayerRound == lobbyPlayer,
                             GameStarted = lobby.GameStarted,
-                            IsCreator = lobby.CreatorId == lobbyPlayer.UserId,
+                            IsCreator = lobby.LobbyCreatorId == lobbyPlayer.UserId,
                             RollCount = lobbyPlayer.RollCount,
                             Players = lobby.GetPlayersModels(),
-                            Options = lobby.Options,
+                            Options = (YahtzeeLobbyOptions)lobby.LobbyOptions,
                         });
                     }
                     else
@@ -180,9 +185,9 @@ public class YahtzeeHub : Hub
                         await Clients.Client(lobbyPlayer.ConnectionId).SendAsync("OnJoin", new YahtzeeOnJoinModel()
                         {
                             GameStarted = lobby.GameStarted,
-                            IsCreator = lobby.CreatorId == lobbyPlayer.UserId,
+                            IsCreator = lobby.LobbyCreatorId == lobbyPlayer.UserId,
                             Players = lobby.GetPlayersModels(),
-                            Options = lobby.Options,
+                            Options = (YahtzeeLobbyOptions)lobby.LobbyOptions,
                             StartState = lobby.IsReadyToStart()
                         });
                     }
@@ -208,7 +213,7 @@ public class YahtzeeHub : Hub
             return;
         }
 
-        if (lobby.CreatorId == player.UserId && !lobby.GameStarted)
+        if (lobby.LobbyCreatorId == player.UserId && !lobby.GameStarted)
         {
             if (!lobby.StartGame())
             {
@@ -223,10 +228,10 @@ public class YahtzeeHub : Hub
                 {
                     Dices = lobby.PlayerRound!.Dices,
                     Points = lobbyPlayer.Points,
-                    SettedPoints = lobbyPlayer.SettedPoints,
+                    PlacedPoints = lobbyPlayer.PlacedPoints,
                     HasRound = lobby.PlayerRound == lobbyPlayer,
                     GameStarted = lobby.GameStarted,
-                    IsCreator = lobby.CreatorId == lobbyPlayer.UserId,
+                    IsCreator = lobby.LobbyCreatorId == lobbyPlayer.UserId,
                     Players = playerModels,
                     RollCount = lobbyPlayer.RollCount,
                 });
@@ -263,7 +268,7 @@ public class YahtzeeHub : Hub
         int playerLobbyPlace = lobby.GetPlayerLobbyPlace(player.UserId);
         bool synchronize = false;
 
-        if (lobby.CreatorId == player.UserId)
+        if (lobby.LobbyCreatorId == player.UserId)
         {
             synchronize = true;
             lobby.RemovePlayerFromLobbyPlace(player.UserId);
@@ -328,7 +333,7 @@ public class YahtzeeHub : Hub
             return;
         }
 
-        if (player.UserId == lobby.CreatorId)
+        if (player.UserId == lobby.LobbyCreatorId)
         {
             lobby.ChangeMaxPlayers(maxPlayersCount);
 

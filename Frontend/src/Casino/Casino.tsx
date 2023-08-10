@@ -240,7 +240,7 @@ export default () => {
   };
 
   const InputMaxBet = () => {
-    setBetInput(user.Coins.toString());
+    setBetInput(user.Balance.toString());
   };
 
   const InputHalfBet = () => {

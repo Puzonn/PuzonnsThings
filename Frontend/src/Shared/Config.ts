@@ -1,5 +1,7 @@
 export class Config 
 {
+    static IsNavContextEventListenerCreated:boolean = false;
+
     static GetApiUrl(){
         if(process.env.NODE_ENV === 'development') {
             return process.env.REACT_APP_DEV_API_URL;

@@ -5,6 +5,7 @@ using PuzonnsThings.Models;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using PuzonnsThings.Repositories;
+using Microsoft.AspNetCore.Identity;
 
 namespace PuzonnsThings.Controllers;
 
@@ -31,7 +32,8 @@ public class UsersController : ControllerBase
 
         ApiUser apiUser = new ApiUser()
         {
-            Coins = user.Coins,
+            Coins = user.Balance,
+            Avatar = user.Avatar,
             UserId = user.Id,
             Username = user.Username
         };
@@ -51,8 +53,9 @@ public class UsersController : ControllerBase
 
         ApiUser apiUser = new ApiUser()
         {
-            Coins = user.Coins,
+            Coins = user.Balance,
             UserId = user.Id,
+            Avatar = user.Avatar,
             Username = user.Username
         };
 

@@ -17,8 +17,6 @@ import { AuthContext } from "../Shared/AuthContext";
 
 const Todo = () => {
   const { isLoggedIn, isFetched } = useContext(AuthContext);
-
-  const [inputValue, setInputValue] = useState<string>("");
   const [fetchedTasks, setFetchedTasks] = useState<TaskModel[]>([]);
   const [screenWidth, setScreenWidth] = useState<number>(window.innerWidth);
   const [showMenuIcon, setShowMenuIcon] = useState<boolean>(false);

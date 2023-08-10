@@ -148,18 +148,60 @@ export const Lobbies = () => {
           </thead>
           <tbody>
             {Lobbies.map((x, index) => {
+              const avatarsCount = x.PlayerCount > 4 ? 4 : x.PlayerCount;
+              const isFreePlace = x.PlayerCount < x.MaxPlayerCount;
+
               return (
                 <tr key={`lobby_${index}`}>
                   <td>{x.LobbyId}</td>
                   <td>{x.LobbyCreator}</td>
                   <td>{x.LobbyType}</td>
-                  <td>
-                    {x.PlayerCount}/{x.MaxPlayerCount}
+                  <td className="lobby-players">
+                    {[...Array(avatarsCount).keys()].map((index) => {
+                      return (
+                        <div
+                          key={`lobby_players_${index}`}
+                          className="lobby-player_avatar-container"
+                        >
+                          <div className="lobby-player_avatar "></div>
+                        </div>
+                      );
+                    })}
+                    <div className="lobby-players_count">
+                      <span>
+                        <span
+                          className={
+                            isFreePlace
+                              ? "lobby-players_count-free"
+                              : "lobby-players_count-full"
+                          }
+                        >
+                          {x.PlayerCount}
+                        </span>
+                        <span
+                          className={
+                            isFreePlace ? "" : "lobby-players_count-full"
+                          }
+                        >
+                          /{x.MaxPlayerCount}
+                        </span>
+                      </span>
+                    </div>
                   </td>
                   <td>
                     {isLoggedIn && (
-                      <button onClick={() => JoinLobby(x.LobbyType, x.LobbyId)}>
-                        Join
+                      <button
+                        onClick={() => JoinLobby(x.LobbyType, x.LobbyId)}
+                        className={
+                          isFreePlace ? "lobby-join_btn" : "lobby-join_full_btn"
+                        }
+                      >
+                        {isFreePlace ? "Join" : "Watch"}
+                      </button>
+                    )}
+                    {!isLoggedIn && (
+                      <button className="lobby-join_login_btn">
+                        <a href="/login">You're not logged in</a>
                       </button>
                     )}
                   </td>

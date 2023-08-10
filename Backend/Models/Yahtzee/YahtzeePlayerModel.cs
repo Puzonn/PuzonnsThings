@@ -3,11 +3,12 @@
 [Serializable]
 public sealed class YahtzeePlayerModel
 {
-    public required string PlayerName { get; set; }
+    public required string Username { get; set; }
+    public required string Avatar { get; set; }
+    public required int UserId { get; set; }
     public int Points { get; set; } = 0;
     public int GameTime { get; set; }  
-    public required int UserId { get; set; }
     public int LobbyPlaceId { get; set; } = -1;
     public bool HasRound { get; set; } = false;
-    public YahtzeeSettedPoint[] SettedPoints { get; set; } = new YahtzeeSettedPoint[0];
+    public YahtzeePlacedPoint[] PlacedPoints { get; set; } = new YahtzeePlacedPoint[0];
 }

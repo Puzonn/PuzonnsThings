@@ -7,10 +7,10 @@ using PuzonnsThings.Databases;
 
 #nullable disable
 
-namespace PuzonnsThings.Migrations
+namespace Backend.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20230625021607_Initial")]
+    [Migration("20230806134026_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -94,9 +94,14 @@ namespace PuzonnsThings.Migrations
                         .HasColumnType("INTEGER")
                         .HasAnnotation("Relational:JsonPropertyName", "Id");
 
-                    b.Property<float>("Coins")
+                    b.Property<string>("Avatar")
+                        .IsRequired()
+                        .HasColumnType("TEXT")
+                        .HasAnnotation("Relational:JsonPropertyName", "Avatar");
+
+                    b.Property<float>("Balance")
                         .HasColumnType("REAL")
-                        .HasAnnotation("Relational:JsonPropertyName", "Coins");
+                        .HasAnnotation("Relational:JsonPropertyName", "Balance");
 
                     b.Property<string>("Email")
                         .HasColumnType("TEXT")

@@ -30,14 +30,14 @@ public class WheelHub : Hub
             return WheelBetCallbackModel.Unsuccessful;
         }
 
-        if (user.Coins >= bet.Amount)
+        if (user.Balance >= bet.Amount)
         {
             if (!wheelService.AddBet(user.Id, bet.WheelPoint, bet.Amount))
             {
                 return WheelBetCallbackModel.Unsuccessful;
             }
 
-            user.Coins -= bet.Amount;
+            user.Balance -= bet.Amount;
             userRepository.UpdateUserAsync(user);
 
             WheelBetCallbackModel callback = new WheelBetCallbackModel()

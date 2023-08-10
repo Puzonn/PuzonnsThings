@@ -1,0 +1,84 @@
+.nav-user_info-container {
+  overflow: hidden;
+  width: 70%;
+  height: 60px;
+  position: relative;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.nav-user_info-balance {
+  padding-left: 10px;
+  width: 170px;
+  border-top-left-radius: 20px;
+  background-color: #282531;
+}
+
+.nav-user_info-balance {
+  color: #ffdda6;
+  padding-left: 20px;
+  padding-top: 5px;
+}
+
+.nav-user_info-username {
+  color: white;
+  max-width: 80px;
+  font-size: 1rem;
+  overflow-x: hidden;
+  font-weight: bold;
+}
+
+.nav-user_info-balance-icon {
+  position: absolute;
+  right: 0px;
+  left: -8px;
+  bottom: -1px;
+  width: 30px;
+  height: 30px;
+}
+
+.nav-user_info-avatar {
+    width: 48px;
+    height: 48px;
+    top: 10%;
+    right: 50px;
+    position: absolute;
+    border-radius: 50%;
+}
+
+.nav-user_info-context-container button {
+  padding-bottom: 8px;
+  color: white;
+  background: #ffffff08;
+  font-size: 1em;
+  font-weight: bold;
+  outline: none;
+  border: none;
+}
+
+.nav-user_info-avatar-letter {
+    text-align: center;
+}
+
+.nav-user_info-context-container {
+  position: absolute;
+  right: -10px;
+  top: 6px;
+  width: 50px;
+  height: 40px;
+}
+
+.nav-user_info-context-container button {
+  width: 30px;
+  height: 30px;
+  position: relative;
+  background-color: #424254;
+}
+
+.nav-user_info-context-container img {
+  width: 15px;
+  height: 15px;
+  position: absolute;
+  bottom: 6px;
+  right: 7px;
+}

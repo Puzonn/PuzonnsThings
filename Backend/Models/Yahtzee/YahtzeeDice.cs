@@ -17,9 +17,4 @@ public sealed class YahtzeeDice
     {
         RolledDots = Random.Shared.Next(1, 7);
     }
-
-    public void Roll(Random random)
-    {
-        RolledDots = random.Next(1, 7);
-    }
 }

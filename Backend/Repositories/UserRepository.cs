@@ -48,7 +48,7 @@ public class UserRepository : IUserRepository
             return;
         }
 
-        user.Coins += coins;
+        user.Balance += coins;
         _dbContext.Update(user);
     }
 

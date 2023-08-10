@@ -2,8 +2,8 @@
 
 :root {
   --text-color: white;
-  --bg-color: #16171b;
-  --nav-bg-color: #121216;
+  --bg-color:   #111114;
+  --nav-bg-color: #19181e;
   --color-red: #dc143c;
   --color-green: #00ff73;
   --color-yellow: #ffbf00;
@@ -36,92 +36,27 @@ html {
 }
 
 header {
+  position: relative;
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  padding: 30px 10%;
-  max-height: 100%;
+  background-color: var(--nav-bg-color);
+  height: 60px;
   font-family: "Montserrat", sans-serif;
 }
 
-nav a {
-  color: #f6f4e6;
-  text-decoration: none;
-  font-size: 1em;
-  font-weight: 500;
-  display: inline-block;
-  max-width: 800px;
-  min-width: 50px;
-  -webkit-transition: all 0.2s ease-in-out;
-  transition: all 0.2s ease-in-out;
-  padding-right: 10px;
-}
-
-nav a:first-child {
-  font-size: x-large;
-}
-
-a {
-  text-decoration: none;
-}
-
-nav #nav-login:hover,
-a:hover {
-  text-decoration: underline;
-}
-
-#nav-login {
-  font-size: larger;
-  margin-right: 10px;
-}
-
-.nav-item {
-  padding: 10px;
-}
-
-@media only screen and (max-device-width: 640px) {
-}
-
-@keyframes nav-list-animation {
-  from {
-    height: 0px;
-  }
-  to {
-    height: 100%;
-  }
-}
-
-#nav-menu-icon {
-  width: 40px;
-  height: 40px;
-}
-
-#nav-menu-context ul {
-  background-color: var(--nav-bg-color);
-}
-
-.nav-menu-context-animation {
-  animation-name: nav-list-animation;
-  animation-name: nav-list-animation;
-  animation-duration: 0.5s;
-  animation-timing-function: ease-in-out;
-  animation-fill-mode: forwards;
-}
-
-.nav-menu-login-btn {
-  background-color: rgba(226, 38, 60, 1);
-  width: 100px;
-}
-
 .nav-img-icon {
-  position:absolute;
-  left: 40px;
-  top: 9px;
+  position: absolute;
+  right: 80px;
+  top: 4px;
   width: 20px;
   height: 20px;
 }
-#nav-menu-context li {
-  padding: 12px;
+
+.nav-site_title {
+  margin-bottom: auto;
+  margin-top: auto;
+  padding-left: 20px;
+  width: 350px;
 }
 
 #register-email_info {
@@ -129,29 +64,26 @@ a:hover {
   color: #e0dede;
 }
 
-.nav-menu-context-grid {
-  display: flex;
-  align-items: center;
-  justify-content: left;
+.nav-nav_item {
+  float: left;
+  font-size: larger;
+  text-decoration: none;
+  color: white;
+  margin-left: 40px;
 }
 
-.nav-menu-context-grid a {
-  padding-left: 10px;
+.nav-nav_item a {
+  text-decoration: none;
+  color: white;
+  font-weight: 600;
 }
 
-.nav-menu-context-grid img {
-  width: 30px;
-  height: 30px;
+.nav-menu-context-container {
+  margin-bottom: auto;
+  margin-top: auto;
+  width: 400px;
 }
 
-header button {
-  padding: 9px 25px;
+.nav-nav_item h3:hover {
   cursor: pointer;
-  border: none;
-  transition: all 0.3s ease 0s;
-}
-
-header {
-  background-color: var(--nav-bg-color);
-  max-height: 50px;
 }

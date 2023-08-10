@@ -7,6 +7,7 @@ export interface LobbyUser {
 }
 
 export interface ILobbyOptions {
+  PrivacyOption: boolean;
   LobbyOptions: Options;
   IsCreator: boolean;
   LobbyId: number;

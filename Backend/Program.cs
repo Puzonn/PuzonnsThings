@@ -7,18 +7,12 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using PuzonnsThings.Databases;
-using PuzonnsThings.Services;
 using System.Diagnostics;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
-
-builder.Logging.Configure(context =>
-{
-});
 
 builder.Services.AddMvc((options) =>
 {
@@ -111,11 +105,10 @@ builder.Services.AddControllers();
 
 builder.Services.AddDbContext<DatabaseContext>(x =>
 {
-    x.UseSqlite(builder.Configuration["ConnectionStrings:Db"]).LogTo((x) =>
-    {
-
-    });
+    x.UseSqlite(builder.Configuration["ConnectionStrings:Db"]);
 });
+
+
 
 builder.Services.AddScoped<YahtzeeService>();
 builder.Services.AddSingleton<WheelService>();

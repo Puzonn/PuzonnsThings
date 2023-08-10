@@ -47,6 +47,43 @@
   outline: none;
 }
 
-.mg_lobby_options, .mg_lobby_players {
+.mg_lobby_options,
+.mg_lobby_players {
   padding: 20px;
+}
+
+.mg_lobby_options-name-container img {
+  width: 20px;
+  height: 20px;
+}
+
+.mg_lobby_options-name-container {
+  padding-top: 10px;
+  padding-left: 3px;
+  font-size: medium;
+  font-weight: bold;
+  display: flex;
+}
+.mg_lobby_options-name-container span {
+  padding-left: 5px;
+}
+
+.mg_lobby_options_container {
+  padding-top: 10px;
+  display: flex;
+}
+
+.mg_lobby_options-option {
+  cursor: pointer;
+  font-weight: bold;
+  text-align: center;
+  width: 100px;
+  height: 35px;
+  border-radius: 10px;
+  background-color: #18181B;
+  border: 1px solid white;
+}
+
+.mg_lobby_options-options-selected { 
+  border: 1px solid #FFDDA6;
 }

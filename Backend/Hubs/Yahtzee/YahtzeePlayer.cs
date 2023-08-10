@@ -1,8 +1,9 @@
-﻿using PuzonnsThings.Models.Yahtzee;
+﻿using Backend.Models.Interfaces;
+using PuzonnsThings.Models.Yahtzee;
 
 namespace PuzonnsThings.Hubs.Yahtzee;
 
-public class YahtzeePlayer
+public class YahtzeePlayer : IPlayer
 {
     private const int MaxDices = 5;
 
@@ -18,18 +19,21 @@ public class YahtzeePlayer
     public uint ConnectedLobbyId { get; set; }
 
     public bool CanPlay { get; set; } = true;
-    public string ConnectionId { get; set; } = string.Empty;
-    public string PlayerName { get; set; }
+
+    public string ConnectionId { get; set; }
+    public string Username { get; }
+    public string Avatar { get; }
 
     public bool CanRoll => RollCount > 0;
     public bool IsReady { get; set; } = true;
 
     public readonly YahtzeeDice[] Dices = new YahtzeeDice[MaxDices];
-    public readonly List<YahtzeeSettedPoint> SettedPoints = new List<YahtzeeSettedPoint>();
+    public readonly List<YahtzeePlacedPoint> PlacedPoints = new List<YahtzeePlacedPoint>();
 
-    public YahtzeePlayer(string playerName, string connectionId, int userId)
+    public YahtzeePlayer(string playerName, string avatar, string connectionId, int userId)
     {
-        PlayerName = playerName;
+        Avatar = avatar;
+        Username = playerName;
         ConnectionId = connectionId;
         UserId = userId;
 
@@ -43,17 +47,17 @@ public class YahtzeePlayer
     {
         ConnectedLobbyId = lobbyId;
         Points = 0;
-        SettedPoints.Clear();
+        PlacedPoints.Clear();
     }
 
     /// <summary>
     /// Checks if player have any moves, there is max 13 moves
     /// </summary>
-    public bool HasMoves() => SettedPoints.Count != 13;
+    public bool HasMoves() => PlacedPoints.Count != 13;
 
     public (bool success, int points) SetPointsFromPoint(YahtzeePointType point)
     {
-        if (SettedPoints.Any(x => x.Point == point))
+        if (PlacedPoints.Any(x => x.Point == point))
         {
             return (false, 0);
         }
@@ -208,7 +212,7 @@ public class YahtzeePlayer
 
         Points += points;
 
-        SettedPoints.Add(new YahtzeeSettedPoint()
+        PlacedPoints.Add(new YahtzeePlacedPoint()
         {
             Point = point,
             PointsFromPoint = points,

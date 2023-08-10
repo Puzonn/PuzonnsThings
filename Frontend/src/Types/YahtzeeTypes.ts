@@ -1,3 +1,5 @@
+import { BooleanLiteral } from "typescript";
+
 export type Dice = {
   rolledDots: number;
   index: number;
@@ -33,12 +35,13 @@ export type RoomModel = {
 };
 
 export type Options = {
-  maxPlayersCount: number;
+  isPublic: boolean;
+  maxPlayers: number;
   gameTime: number;
 };
 
 export type Player = {
-  playerName: string;
+  username: string;
   gameTime: number;
   points: number;
   hasTime: boolean;

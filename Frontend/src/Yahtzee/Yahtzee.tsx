@@ -45,7 +45,11 @@ export const Yahtzee = () => {
   const [lobby, setLobby] = useState<Lobby>({
     playerCells: [],
     lobbyId: -1,
-    options: { maxPlayersCount: -1, gameTime: -1 },
+    options: {
+      gameTime: -1,
+      isPublic: false,
+      maxPlayers: 2,
+    },
     gameStarted: false,
     players: [],
     startState: false,
@@ -56,7 +60,7 @@ export const Yahtzee = () => {
   const [endgameScreen, setEndgameScreen] = useState<Endgame>();
   const [timerTime, setTimerTime] = useState(0);
   const [playerTimes, setPlayerTimes] = useState({});
-  const [timerState, setTimerState] = useState(false)
+  const [timerState, setTimerState] = useState(false);
 
   const [params] = useSearchParams();
   const cells = PointCells;
@@ -68,7 +72,7 @@ export const Yahtzee = () => {
   const ChangeMaxPlayersStateCallback = (state: OptionsMaxPlayersState) => {
     setLobby((prev) => {
       const option = prev.options;
-      option.maxPlayersCount = state.maxPlayersState;
+      option.maxPlayers = state.maxPlayersState;
       return { ...prev, options: option, players: state.players };
     });
   };
@@ -91,14 +95,14 @@ export const Yahtzee = () => {
       });
 
       setPlayerTimes((prev) => {
-        if(!lobby.gameStarted || timerState === false){
+        if (!lobby.gameStarted || timerState === false) {
           return prev;
         }
 
         const playerRound = lobby.players.find((x) => x.hasRound);
 
         if (!playerRound) {
-          console.error("Cannot find playerRound")
+          console.error("Cannot find playerRound");
           return prev;
         }
 
@@ -108,9 +112,12 @@ export const Yahtzee = () => {
     }, 1000);
   }, [timerTime]);
 
-  const OnLobbyPlaceClick = (placeId: number) => {
+  const LobbyPlaceClick = (placeId: number) => {
     hubConnection.send("OnLobbyPlaceClick", placeId);
   };
+
+  //Changes privacy option, where true == private game
+  const PrivacyChange = (state: boolean) => {};
 
   const ChoosePlaceState = (placeId: number) => {
     hubConnection.send("OnChoosePlaceState", placeId);
@@ -121,9 +128,9 @@ export const Yahtzee = () => {
     pointType: PointType,
     points: number
   ) => {
-    const settedPoints = [...lobby.playerCells];
+    const placedPoints = [...lobby.playerCells];
 
-    const point = settedPoints.find((x) => x.userId === userId);
+    const point = placedPoints.find((x) => x.userId === userId);
 
     if (typeof point === "undefined") {
       console.error(`Point of ${userId} has undefined row ${pointType}`);
@@ -132,7 +139,7 @@ export const Yahtzee = () => {
     point.pointCell[pointType] = { pointType: pointType, points: points };
 
     setLobby((prev) => {
-      return { ...prev, playerCells: settedPoints };
+      return { ...prev, playerCells: placedPoints };
     });
   };
 
@@ -153,12 +160,12 @@ export const Yahtzee = () => {
   }, []);
 
   const OnEndGame = (data: any) => {
-    console.log(data)
+    console.log(data);
     const endgame: Endgame = data;
 
     setEndgameScreen(endgame);
     setGameEnded(true);
-    setTimerState(false)
+    setTimerState(false);
     user.fetchUpdated();
   };
 
@@ -166,14 +173,14 @@ export const Yahtzee = () => {
     const cells: PlayerCell[] = [];
 
     for (const player of data.players) {
-      const settedPoints: PointCell[] = [];
-      for (const settedPoint of player.settedPoints) {
-        settedPoints.push({
-          pointType: settedPoint.point,
-          points: settedPoint.pointsFromPoint,
+      const placedPoints: PointCell[] = [];
+      for (const placedPoints of player.placedPoints) {
+        placedPoints.push({
+          pointType: placedPoints.point,
+          points: placedPoints.pointsFromPoint,
         });
       }
-      cells.push({ userId: player.userId, pointCell: settedPoints });
+      cells.push({ userId: player.userId, pointCell: placedPoints });
     }
 
     const joinnedLobby: Lobby = {
@@ -185,7 +192,7 @@ export const Yahtzee = () => {
       startState: data.startState,
       isCreator: data.isCreator,
     };
-
+    console.log(data.options)
     const times = {};
     for (const player of data.players) {
       (times as any)[player.userId] = player.gameTime;
@@ -198,7 +205,7 @@ export const Yahtzee = () => {
     setHasRound(data.hasRound);
     setCreator(data.isCreator);
     setDices(data.dices);
-    setTimerState(joinnedLobby.gameStarted)
+    setTimerState(joinnedLobby.gameStarted);
   };
 
   useEffect(() => {
@@ -263,15 +270,15 @@ export const Yahtzee = () => {
     setDices(data.dices);
 
     for (const player of data.players) {
-      const settedPoints: PointCell[] = [];
+      const placedPoints: PointCell[] = [];
 
-      for (const settedPoint of player.settedPoints) {
-        settedPoints.push({
-          pointType: settedPoint.point,
-          points: settedPoint.pointsFromPoint,
+      for (const placedPoints of player.placedPoints) {
+        placedPoints.push({
+          pointType: placedPoints.point,
+          points: placedPoints.pointsFromPoint,
         });
       }
-      cells.push({ userId: player.userId, pointCell: settedPoints });
+      cells.push({ userId: player.userId, pointCell: placedPoints });
     }
     setHasRound(data.hasRound);
     setLobby((prev) => {
@@ -351,18 +358,19 @@ export const Yahtzee = () => {
     return (
       <div>
         <LobbyManager
+          MaxPlayers={lobby.options.maxPlayers}
           OnStartClick={StartGame}
           StartReadyState={lobby.startState}
           LobbyOptions={lobby.options}
           OnChoosePlaceState={ChoosePlaceState}
           OnChangeMaxPlayersState={ChangeMaxPlayersState}
-          OnLobbyPlaceClick={OnLobbyPlaceClick}
+          OnLobbyPlaceClick={LobbyPlaceClick}
           LobbyId={lobby.lobbyId}
-          MaxPlayers={5}
+          PrivacyOption={true}
           MinPlayers={2}
           LobbyUsers={lobby.players.map(
-            ({ playerName, lobbyPlaceId, userId }) => ({
-              Username: playerName,
+            ({ username, lobbyPlaceId, userId }) => ({
+              Username: username,
               LobbyPlace: lobbyPlaceId,
               UserId: userId,
             })
@@ -382,7 +390,7 @@ export const Yahtzee = () => {
             {lobby.players.map((player, index) => {
               return (
                 <th
-                  key={`yahtzee_player_cell_${player.playerName}`}
+                  key={`yahtzee_player_cell_${player.username}`}
                   style={{ width: "150px" }}
                 >
                   <div
@@ -395,7 +403,7 @@ export const Yahtzee = () => {
                     }}
                     key={"player_" + index}
                   >
-                    {player.playerName}
+                    {player.username}
                   </div>
                   <div
                     style={{

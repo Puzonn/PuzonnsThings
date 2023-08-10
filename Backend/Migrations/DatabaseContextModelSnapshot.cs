@@ -6,7 +6,7 @@ using PuzonnsThings.Databases;
 
 #nullable disable
 
-namespace PuzonnsThings.Migrations
+namespace Backend.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
     partial class DatabaseContextModelSnapshot : ModelSnapshot
@@ -91,9 +91,14 @@ namespace PuzonnsThings.Migrations
                         .HasColumnType("INTEGER")
                         .HasAnnotation("Relational:JsonPropertyName", "Id");
 
-                    b.Property<float>("Coins")
+                    b.Property<string>("Avatar")
+                        .IsRequired()
+                        .HasColumnType("TEXT")
+                        .HasAnnotation("Relational:JsonPropertyName", "Avatar");
+
+                    b.Property<float>("Balance")
                         .HasColumnType("REAL")
-                        .HasAnnotation("Relational:JsonPropertyName", "Coins");
+                        .HasAnnotation("Relational:JsonPropertyName", "Balance");
 
                     b.Property<string>("Email")
                         .HasColumnType("TEXT")

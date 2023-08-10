@@ -18,8 +18,9 @@ import { ContactAndInformations } from "./ContactAndInformations/ContactAndInfor
 export function App() {
   const [loggedUser, setUser] = useState<UserContextModel>({
     Username: "",
-    Coins: 0,
+    Balance: 0,
     UserId: -1,
+    Avatar: "",
     setUser: () => {},
     fetchUpdated: () => {},
   });
@@ -38,8 +39,9 @@ export function App() {
           setUser((user) => ({
             ...user,
             Username: data.username,
-            Coins: data.coins,
-            UserId: data.userId
+            Coins: data.balance,
+            Avatar: data.avatar,
+            UserId: data.userId,
           }));
         });
 
@@ -54,8 +56,9 @@ export function App() {
     <BrowserRouter>
       <UserContext.Provider
         value={{
+          Avatar: loggedUser.Avatar,
           Username: loggedUser.Username,
-          Coins: loggedUser.Coins,
+          Balance: loggedUser.Balance,
           UserId: loggedUser.UserId,
           setUser: loggedUser.setUser,
           fetchUpdated: loggedUser.fetchUpdated,

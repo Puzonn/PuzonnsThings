@@ -1,4 +1,4 @@
-﻿namespace PuzonnsThings.Models;
+﻿namespace Backend.Models.Interfaces;
 
 public interface ILobbyCollectable
 {

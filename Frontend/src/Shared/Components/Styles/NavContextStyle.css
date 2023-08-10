@@ -1,0 +1,24 @@
+.nav-context-container {
+    position: absolute;
+    right: 0;
+    top: 60px;
+    background-color: #282531;
+    border-bottom-left-radius: 10px;
+    border-top-left-radius: 10px;
+    width: 200px;
+}
+
+.nav-context-container ul { 
+    font-weight: bold;
+    text-align: center;
+    font-size: 16px;
+}
+
+.nav-context-container li {
+    padding-top: 4px;
+}
+
+.nav-context-container li:hover {
+    cursor: pointer;
+    opacity: 0.7;
+}

@@ -1,11 +1,23 @@
-span,
-a {
-  color: white;
-}
-
 #todo-container {
   display: flex;
   flex-wrap: wrap;
+}
+
+#todo-container input {
+  padding-left: 5px;
+}
+
+#todo-container button {
+  width: 200px;
+  height: 40px;
+  color: white;
+  background: #ffffff08;
+  margin: 3px 0;
+  font-size: 1em;
+  font-weight: bold;
+  border-radius: 10px;
+  outline: none;
+  border: none;
 }
 
 #todo-creator input,

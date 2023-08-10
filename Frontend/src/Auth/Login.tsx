@@ -27,7 +27,6 @@ export const Login = () => {
 
   const HandleLoginFormSubmit = (event: any) => {
     event.preventDefault();
-    console.log(event)
     setError("")
     
     const username = event.target[0].value;
@@ -90,7 +89,7 @@ export const Login = () => {
         <div>
           <a style={{ color: "red" }}>{error}</a>
         </div>
-        <a href="/register">
+        <a style={{color: 'white'}} href="/register">
           Already have account? <span style={{textDecoration: 'underline'}}>Create account</span>
         </a>
       </form>

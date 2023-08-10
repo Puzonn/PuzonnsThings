@@ -2,7 +2,7 @@
 
 #nullable disable
 
-namespace PuzonnsThings.Migrations
+namespace Backend.Migrations
 {
     /// <inheritdoc />
     public partial class Initial : Migration
@@ -55,7 +55,8 @@ namespace PuzonnsThings.Migrations
                     Username = table.Column<string>(type: "TEXT", nullable: false),
                     Password = table.Column<string>(type: "TEXT", nullable: false),
                     Email = table.Column<string>(type: "TEXT", nullable: true),
-                    Coins = table.Column<float>(type: "REAL", nullable: false)
+                    Balance = table.Column<float>(type: "REAL", nullable: false),
+                    Avatar = table.Column<string>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {

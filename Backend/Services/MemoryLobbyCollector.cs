@@ -1,4 +1,4 @@
-﻿using PuzonnsThings.Models;
+﻿using Backend.Models.Interfaces;
 using PuzonnsThings.Repositories;
 
 namespace PuzonnsThings.Services;
