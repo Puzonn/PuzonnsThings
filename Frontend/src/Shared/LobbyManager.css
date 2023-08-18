@@ -1,89 +1,106 @@
 .mg_lobby_place {
-  background-color: #ffffff08;
-  width: 200px;
-  height: 50px;
-  margin-bottom: 25px;
-  text-align: center;
-  border-radius: 10px;
-  cursor: pointer;
+    background-color: #ffffff08;
+    width: 200px;
+    height: 50px;
+    margin-bottom: 25px;
+    text-align: center;
+    border-radius: 10px;
+    cursor: pointer;
 }
 
 .mg_lobby_place p {
-  font-size: smaller;
-  color: var(--color-grey);
-}
-
-.mg_lobby_place_container {
-  display: flex;
+    font-size: smaller;
+    color: var(--color-grey);
 }
 
 .mg_lobby_nav {
-  text-align: center;
-  width: 500px;
+    text-align: center;
+}
+
+.mg_nav-unselected {
+    border: 1px solid #6A6D81;
+    background-color: #19181E;
 }
 
 .mg_nav-selected {
-  background-color: #ffffff08;
-  border-radius: 10px;
+    border: 1px solid #FFDDA6;
+    background-color: #19181E;
+}
+
+.mg_nav-left {
+    border-bottom-left-radius: 10px;
+}
+
+.mg_nav-right {
+    border-bottom-right-radius: 10px;
 }
 
 .mg_lobby_nav li {
-  cursor: pointer;
-  width: 150px;
-  float: left;
+    cursor: pointer;
+    width: 150px;
+    float: left;
 }
 
 .mg_lobby_adm {
-  width: 300px;
-  margin-left: 20px;
-  border-radius: 10px;
 }
 
 .mg_lobby_players-input {
-  width: 100px;
-  border-radius: 10px;
-  height: 30px;
-  border: none;
-  outline: none;
+    width: 100px;
+    border-radius: 10px;
+    height: 30px;
+    border: none;
+    outline: none;
 }
 
 .mg_lobby_options,
 .mg_lobby_players {
-  padding: 20px;
+    padding: 2px;
+}
+
+.mg_lobby_places {
+    padding-left: 20px;
+    margin-right: 20px;
+    float: left;
+    height: 90vh;
+    overflow: auto;
 }
 
 .mg_lobby_options-name-container img {
-  width: 20px;
-  height: 20px;
+    width: 20px;
+    height: 20px;
+}
+
+.mg_lobby_start-btn {
+    text-align: center;
 }
 
 .mg_lobby_options-name-container {
-  padding-top: 10px;
-  padding-left: 3px;
-  font-size: medium;
-  font-weight: bold;
-  display: flex;
+    padding-top: 10px;
+    padding-left: 3px;
+    font-size: medium;
+    font-weight: bold;
+    display: flex;
 }
+
 .mg_lobby_options-name-container span {
-  padding-left: 5px;
+    padding-left: 5px;
 }
 
 .mg_lobby_options_container {
-  padding-top: 10px;
-  display: flex;
+    padding-top: 10px;
 }
 
 .mg_lobby_options-option {
-  cursor: pointer;
-  font-weight: bold;
-  text-align: center;
-  width: 100px;
-  height: 35px;
-  border-radius: 10px;
-  background-color: #18181B;
-  border: 1px solid white;
+    cursor: pointer;
+    font-weight: bold;
+    text-align: center;
+    width: 100px;
+    height: 35px;
+    border-radius: 10px;
+    background-color: #18181B;
+    border: 1px solid #6A6D81;
 }
 
-.mg_lobby_options-options-selected { 
-  border: 1px solid #FFDDA6;
+.mg_lobby_options-options-selected {
+    border: 1px solid #FFDDA6;
 }

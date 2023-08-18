@@ -24,20 +24,20 @@ export function App() {
     setUser: () => {},
     fetchUpdated: () => {},
   });
-
+  
   const [loggedInfo, setLoggedInfo] = useState({
     isLoggedIn: false,
-    isFecthed: false,
+    isFetched: false,
   });
 
   useEffect(() => {
     Auth.IsLoggedIn((state) => {
-      setLoggedInfo({ isLoggedIn: state, isFecthed: true });
+      setLoggedInfo({ isLoggedIn: state, isFetched: true });
 
       if (state) {
         const update = FetchSelf().then((data) => {
           setUser((user) => ({
-            ...user,
+            ...user,  
             Username: data.username,
             Coins: data.balance,
             Avatar: data.avatar,
@@ -66,7 +66,7 @@ export function App() {
       >
         <AuthContext.Provider
           value={{
-            isFetched: loggedInfo.isFecthed,
+            isFetched: loggedInfo.isFetched,
             isLoggedIn: loggedInfo.isLoggedIn,
             setAuth: () => setLoggedInfo,
           }}

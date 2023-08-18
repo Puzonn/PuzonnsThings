@@ -1,5 +1,3 @@
-import { BooleanLiteral } from "typescript";
-
 export type Dice = {
   rolledDots: number;
   index: number;
@@ -42,6 +40,7 @@ export type Options = {
 
 export type Player = {
   username: string;
+  avatar: string;
   gameTime: number;
   points: number;
   hasTime: boolean;
@@ -159,4 +158,3 @@ export const PointCells: CellPoint[] = [
     description: "Score 50 points if all five dice show the same number.",
   },
 ];
- 

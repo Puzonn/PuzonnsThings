@@ -1,44 +1,16 @@
-﻿using PuzonnsThings.Models.Yahtzee;
-using Microsoft.AspNetCore.SignalR;
-using System.Diagnostics;
-using System.Timers;
-using Timer = System.Timers.Timer;
+﻿using System.Timers;
 using Backend.Models;
+using Microsoft.AspNetCore.SignalR;
+using PuzonnsThings.Models.Yahtzee;
+using Timer = System.Timers.Timer;
 
 namespace PuzonnsThings.Hubs.Yahtzee;
 
 public class YahtzeeLobby : Lobby<YahtzeePlayer, YahtzeeLobbyOptions>
 {
-    private Timer RoundTimer { get; set; } = new Timer();
-
     private readonly IHubContext<YahtzeeHub> HubContext;
 
-    public YahtzeePlayer? PlayerRound { get; set; }
-
-    public bool GameEnded { get; set; } = false;
-    public bool GameStarted { get; private set; } = false;
-    public bool IsInitialized { get; private set; }
-
     private int _startedGameTime;
-
-    public int GameTime
-    {
-        get
-        {
-            return GameStarted ? _startedGameTime : LobbyOptions.GameTime;
-        }
-        set
-        {
-            if (!GameStarted)
-            {
-                LobbyOptions.GameTime = value;
-            }
-            else
-            {
-                _startedGameTime = value;
-            }
-        }
-    }
 
     public YahtzeeLobby(IHubContext<YahtzeeHub> hubContext, uint creatorId, uint lobbyId) :
         base(creatorId, lobbyId, YahtzeeLobbyOptions.Default)
@@ -46,46 +18,67 @@ public class YahtzeeLobby : Lobby<YahtzeePlayer, YahtzeeLobbyOptions>
         HubContext = hubContext;
     }
 
-    public bool IsReadyToStart() => LobbyPlaces.Count >= LobbyOptions.MinPlayersLimit && LobbyPlaces.All(x => x.Value != -1);
+    private Timer RoundTimer { get; set; } = new();
+
+    public YahtzeePlayer? PlayerRound { get; set; }
+
+    public bool GameEnded { get; set; }
+    public bool GameStarted { get; private set; }
+    public bool IsInitialized { get; private set; }
+
+    public int GameTime
+    {
+        get => GameStarted ? _startedGameTime : LobbyOptions.GameTime;
+        set => LobbyOptions.GameTime = value;
+    }
+
+    public bool IsReadyToStart()
+    {
+        return LobbyPlaces.Count >= LobbyOptions.MinPlayersLimit && LobbyPlaces.All(x => x.Value != -1);
+    }
 
 
     /// <summary>
-    /// Creates an instance of the YahtzeeEndGameModel that represents the endgame state and leaderboard.
+    ///     Creates an instance of the YahtzeeEndGameModel that represents the endgame state and leaderboard.
     /// </summary>
     /// <returns>The YahtzeeEndGameModel instance.</returns>
-    public YahtzeeEndGameModel CreateEndgameModel()
+    private YahtzeeEndGameModel CreateEndgameModel()
     {
-        YahtzeePlayer winner = Players.OrderBy(x => x.Points).Where(x => x.CanPlay).First();
-        Dictionary<string, float> leaderboard = new Dictionary<string, float>();
+        var winner = Players.OrderBy(x => x.Points).First(x => x.CanPlay);
+        var leaderboard = new Dictionary<string, float>();
 
-        foreach (YahtzeePlayer lobbyPlayer in Players)
-        {
+        foreach (var lobbyPlayer in Players)
             leaderboard.Add(lobbyPlayer.Username, (float)(lobbyPlayer.Points * 0.1 * Players.Count));
-        }
 
-        return new YahtzeeEndGameModel()
+        return new YahtzeeEndGameModel
         {
             Leaderboard = leaderboard,
             WinnerUsername = winner.Username
         };
     }
 
+    public bool ChangeGameTime(int state)
+    {
+        if (state <= LobbyOptions.MaxGameTimeLimit && state >= LobbyOptions.MinPlayersLimit && !GameStarted)
+        {
+            LobbyOptions.GameTime = state;
+            return true;
+        }
+
+        return false;
+    }
+
     public async Task EndGame()
     {
-        YahtzeeEndGameModel endgame = CreateEndgameModel();
+        var endgame = CreateEndgameModel();
 
-        foreach (YahtzeePlayer lobbyPlayer in Players)
-        {
+        foreach (var lobbyPlayer in Players)
             await HubContext.Clients.Client(lobbyPlayer.ConnectionId).SendAsync("OnEndGame", endgame);
-        }
     }
 
     public bool StartGame()
     {
-        if (!IsReadyToStart() && !GameStarted)
-        {
-            return false;
-        }
+        if (!IsReadyToStart() && !GameStarted) return false;
 
         GameStarted = true;
 
@@ -116,8 +109,6 @@ public class YahtzeeLobby : Lobby<YahtzeePlayer, YahtzeeLobbyOptions>
     {
         if (PlayerRound is not null)
         {
-            Debug.WriteLine($"Time is on, PlayerRound game time: {PlayerRound.GameTime}");
-
             if (PlayerRound.GameTime == 0)
             {
                 PlayerRound.CanPlay = false;
@@ -129,23 +120,24 @@ public class YahtzeeLobby : Lobby<YahtzeePlayer, YahtzeeLobbyOptions>
         }
     }
 
-    public YahtzeePlayer GetLastPlayer() => Players.Last();
+    public YahtzeePlayer GetLastPlayer()
+    {
+        return Players.Last();
+    }
 
     public YahtzeePlayerModel[] GetPlayersModels()
     {
-        YahtzeePlayerModel[] players = new YahtzeePlayerModel[Players.Count];
-        Debug.Write(Players);
-        for (int i = 0; i < Players.Count; i++)
+        var players = new YahtzeePlayerModel[Players.Count];
+
+        for (var i = 0; i < Players.Count; i++)
         {
-            YahtzeePlayer lobbyPlayer = Players[i];
-            int lobbyPlaceId = -1;
+            var lobbyPlayer = Players[i];
+            var lobbyPlaceId = -1;
 
             if (LobbyPlaces.ContainsKey(lobbyPlayer.UserId))
-            {
                 lobbyPlaceId = LobbyPlaces[lobbyPlayer.UserId];
-            }
 
-            players[i] = new YahtzeePlayerModel()
+            players[i] = new YahtzeePlayerModel
             {
                 Avatar = lobbyPlayer.Avatar,
                 HasRound = PlayerRound == lobbyPlayer,
@@ -154,7 +146,7 @@ public class YahtzeeLobby : Lobby<YahtzeePlayer, YahtzeeLobbyOptions>
                 Points = lobbyPlayer.Points,
                 PlacedPoints = lobbyPlayer.PlacedPoints.ToArray(),
                 LobbyPlaceId = lobbyPlaceId,
-                UserId = lobbyPlayer.UserId,
+                UserId = lobbyPlayer.UserId
             };
         }
 
@@ -163,64 +155,45 @@ public class YahtzeeLobby : Lobby<YahtzeePlayer, YahtzeeLobbyOptions>
 
     private YahtzeePlayer GetNextPlayer(YahtzeePlayer? player)
     {
-        if (player is null)
-        {
-            throw new InvalidOperationException("PlayerRound is null, which is an invalid state.");
-        }
+        if (player is null) throw new InvalidOperationException("PlayerRound is null, which is an invalid state.");
 
-        int playerIndex = Players.IndexOf(player);
+        var playerIndex = Players.IndexOf(player);
 
         if (playerIndex + 1 == Players.Count)
-        {
             return Players[0];
-        }
-        else
-        {
-            return Players[playerIndex + 1];
-        }
+        return Players[playerIndex + 1];
     }
 
-    public bool CheckWin()
+    private bool CheckWin()
     {
-        return Players.Where(x => !x.CanPlay).Count() == Players.Count - 1;
+        return Players.Count(x => !x.CanPlay) == Players.Count - 1;
     }
 
     public async Task NextRound()
     {
         if (CheckWin())
         {
-            foreach (YahtzeePlayer lobbyPlayer in Players)
-            {
+            foreach (var lobbyPlayer in Players)
                 await HubContext.Clients.Client(lobbyPlayer.ConnectionId).SendAsync("OnEndGame", CreateEndgameModel());
-            }
 
             GameEnded = true;
             return;
         }
 
-        YahtzeePlayer nextPlayer = GetNextPlayer(PlayerRound);
+        var nextPlayer = GetNextPlayer(PlayerRound);
 
-        while (!nextPlayer.CanPlay)
-        {
-            nextPlayer = GetNextPlayer(nextPlayer);
-        }
+        while (!nextPlayer.CanPlay) nextPlayer = GetNextPlayer(nextPlayer);
 
         if (!GameStarted || PlayerRound is null)
-        {
             throw new InvalidOperationException("Game is not started, which is an invalid state.");
-        }
 
         PlayerRound.RollCount = 2;
 
         PlayerRound = nextPlayer;
 
-        foreach (YahtzeePlayer player in Players)
-        {
-            foreach (YahtzeeDice dice in player.Dices)
-            {
-                dice.Roll();
-            }
-        }
+        foreach (var player in Players)
+        foreach (var dice in player.Dices)
+            dice.Roll();
     }
 
     public void Initialize(YahtzeePlayer creator)

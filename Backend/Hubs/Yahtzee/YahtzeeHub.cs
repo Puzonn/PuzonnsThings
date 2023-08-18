@@ -1,24 +1,21 @@
-﻿using PuzonnsThings.Models.Lobbies;
-using PuzonnsThings.Models.Yahtzee;
-using PuzonnsThings.Services;
+﻿using System.IdentityModel.Tokens.Jwt;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using PuzonnsThings.Models;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
+using PuzonnsThings.Models.Yahtzee;
 using PuzonnsThings.Repositories;
+using PuzonnsThings.Services;
 
 namespace PuzonnsThings.Hubs.Yahtzee;
 
 [Authorize]
 public class YahtzeeHub : Hub
 {
+    private readonly IHubContext<YahtzeeHub> HubContext;
+    private readonly MemoryLobbyCollector LobbyCollector;
     private readonly YahtzeeService LobbyService;
     private readonly IUserRepository Repository;
-    private readonly MemoryLobbyCollector LobbyCollector;
     private readonly YahtzeeHubContext YahtzeeContext;
-
-    private readonly IHubContext<YahtzeeHub> HubContext;
 
     public YahtzeeHub(IUserRepository repository, YahtzeeService lobbyService,
         MemoryLobbyCollector lobbyCollector, IHubContext<YahtzeeHub> hubContext)
@@ -50,34 +47,26 @@ public class YahtzeeHub : Hub
     }
 
     /// <summary>
-    /// Checks if room exist in memory, if room dose not exist it checks if room exist in database then creates room in memory
+    ///     Checks if room exist in memory, if room dose not exist it checks if room exist in database then creates room in
+    ///     memory
     /// </summary>
     private async Task<bool> DoesRoomExist(uint roomId, uint userId)
     {
         if (!LobbyService.HasLobby(roomId))
         {
-            LobbyModel? lobby = await LobbyService.GetLobbyModel(roomId);
+            var lobby = await LobbyService.GetLobbyModel(roomId);
 
-            if (lobby is null)
-            {
-                return false;
-            }
+            if (lobby is null) return false;
 
             LobbyService.AddRoom(lobby.Id, new YahtzeeLobby(HubContext, userId, roomId));
         }
         else /* Check if lobby should be recreated */
         {
-            YahtzeeLobby? lobby = LobbyService.GetLobby(roomId);
+            var lobby = LobbyService.GetLobby(roomId);
 
-            if (lobby is null)
-            {
-                return false;
-            }
+            if (lobby is null) return false;
 
-            if (lobby.GameEnded)
-            {
-                await ForcedLeave("Game ended");
-            }
+            if (lobby.GameEnded) await ForcedLeave("Game ended");
         }
 
         return true;
@@ -90,13 +79,13 @@ public class YahtzeeHub : Hub
     }
 
     /// <summary>
-    /// Handles user joins into lobby
+    ///     Handles user joins into lobby
     /// </summary>
     /// <param name="roomId">Id of the room</param>
     /// <returns>True if user is authorized and rooms exists</returns>
     public async Task<bool> Join(uint roomId)
     {
-        User? user = await GetUser();
+        var user = await GetUser();
 
         if (user is null)
         {
@@ -113,39 +102,29 @@ public class YahtzeeHub : Hub
         }
 
         if (!LobbyService.HasPlayer(user.Id))
-        {
-            LobbyService.AddPlayer(user.Id, new YahtzeePlayer(user.Username, user.Avatar, Context.ConnectionId, user.Id));
-        }
+            LobbyService.AddPlayer(user.Id,
+                new YahtzeePlayer(user.Username, user.Avatar, Context.ConnectionId, user.Id));
 
-        YahtzeePlayer player = LobbyService.GetPlayer(user.Id);
+        var player = LobbyService.GetPlayer(user.Id);
 
         player.ConnectionId = Context.ConnectionId;
 
-        if (roomId != player.ConnectedLobbyId)
-        {
-            player.Restart(roomId);
-        }
+        if (roomId != player.ConnectedLobbyId) player.Restart(roomId);
 
         /* If lobby dose exist update joined user ex. sync last state*/
-        if (LobbyService.HasLobby(roomId, out YahtzeeLobby? lobby))
+        if (LobbyService.HasLobby(roomId, out var lobby))
         {
-            if (lobby is null)
-            {
-                return false;
-            }
+            if (lobby is null) return false;
 
             LobbyCollector.RegisterLobby(lobby);
 
             player.ConnectedLobbyId = roomId;
 
-            if (!lobby.IsInitialized && lobby is not null)
+            if (!lobby.IsInitialized)
             {
-                if (player.UserId == lobby.LobbyCreatorId)
-                {
-                    lobby.Initialize(player);
-                }
+                if (player.UserId == lobby.LobbyCreatorId) lobby.Initialize(player);
 
-                await Clients.Caller.SendAsync("OnJoin", new YahtzeeOnJoinModel()
+                await Clients.Caller.SendAsync("OnJoin", new YahtzeeOnJoinModel
                 {
                     Dices = player.Dices,
                     Points = player.Points,
@@ -156,18 +135,13 @@ public class YahtzeeHub : Hub
                     Players = lobby.GetPlayersModels()
                 });
             }
-            else if (lobby is not null)
+            else
             {
-                if (!lobby.Players.Contains(player))
-                {
-                    lobby.Players.Add(player);
-                }
+                if (!lobby.Players.Contains(player)) lobby.Players.Add(player);
 
-                foreach (YahtzeePlayer lobbyPlayer in lobby.Players)
-                {
+                foreach (var lobbyPlayer in lobby.Players)
                     if (lobby.GameStarted)
-                    {
-                        await Clients.Client(lobbyPlayer.ConnectionId).SendAsync("OnJoin", new YahtzeeOnJoinModel()
+                        await Clients.Client(lobbyPlayer.ConnectionId).SendAsync("OnJoin", new YahtzeeOnJoinModel
                         {
                             Dices = lobbyPlayer.Dices,
                             Points = lobbyPlayer.Points,
@@ -177,21 +151,17 @@ public class YahtzeeHub : Hub
                             IsCreator = lobby.LobbyCreatorId == lobbyPlayer.UserId,
                             RollCount = lobbyPlayer.RollCount,
                             Players = lobby.GetPlayersModels(),
-                            Options = (YahtzeeLobbyOptions)lobby.LobbyOptions,
+                            Options = lobby.LobbyOptions
                         });
-                    }
                     else
-                    {
-                        await Clients.Client(lobbyPlayer.ConnectionId).SendAsync("OnJoin", new YahtzeeOnJoinModel()
+                        await Clients.Client(lobbyPlayer.ConnectionId).SendAsync("OnJoin", new YahtzeeOnJoinModel
                         {
                             GameStarted = lobby.GameStarted,
                             IsCreator = lobby.LobbyCreatorId == lobbyPlayer.UserId,
                             Players = lobby.GetPlayersModels(),
-                            Options = (YahtzeeLobbyOptions)lobby.LobbyOptions,
+                            Options = lobby.LobbyOptions,
                             StartState = lobby.IsReadyToStart()
                         });
-                    }
-                }
 
                 player.ConnectedLobbyId = roomId;
             }
@@ -215,16 +185,12 @@ public class YahtzeeHub : Hub
 
         if (lobby.LobbyCreatorId == player.UserId && !lobby.GameStarted)
         {
-            if (!lobby.StartGame())
-            {
-                return;
-            }
+            if (!lobby.StartGame()) return;
 
-            YahtzeePlayerModel[] playerModels = lobby.GetPlayersModels();
+            var playerModels = lobby.GetPlayersModels();
 
-            foreach (YahtzeePlayer lobbyPlayer in lobby.Players)
-            {
-                await Clients.Client(lobbyPlayer.ConnectionId).SendAsync("OnJoin", new YahtzeeOnJoinModel()
+            foreach (var lobbyPlayer in lobby.Players)
+                await Clients.Client(lobbyPlayer.ConnectionId).SendAsync("OnJoin", new YahtzeeOnJoinModel
                 {
                     Dices = lobby.PlayerRound!.Dices,
                     Points = lobbyPlayer.Points,
@@ -233,15 +199,14 @@ public class YahtzeeHub : Hub
                     GameStarted = lobby.GameStarted,
                     IsCreator = lobby.LobbyCreatorId == lobbyPlayer.UserId,
                     Players = playerModels,
-                    RollCount = lobbyPlayer.RollCount,
+                    RollCount = lobbyPlayer.RollCount
                 });
-            }
         }
     }
 
     public override async Task OnConnectedAsync()
     {
-        User? user = await GetUser();
+        var user = await GetUser();
 
         if (user == null)
         {
@@ -265,8 +230,8 @@ public class YahtzeeHub : Hub
             return;
         }
 
-        int playerLobbyPlace = lobby.GetPlayerLobbyPlace(player.UserId);
-        bool synchronize = false;
+        var playerLobbyPlace = lobby.GetPlayerLobbyPlace(player.UserId);
+        var synchronize = false;
 
         if (lobby.LobbyCreatorId == player.UserId)
         {
@@ -281,16 +246,14 @@ public class YahtzeeHub : Hub
 
         if (synchronize)
         {
-            YahtzeeOnChoosePlace choosePlaceEvent = new YahtzeeOnChoosePlace()
+            var choosePlaceEvent = new YahtzeeOnChoosePlace
             {
                 Players = lobby.GetPlayersModels(),
-                StartState = false,
+                StartState = false
             };
 
-            foreach (YahtzeePlayer lobbyPlayer in lobby.Players)
-            {
+            foreach (var lobbyPlayer in lobby.Players)
                 await Clients.Client(lobbyPlayer.ConnectionId).SendAsync("ChoosePlaceStateCallback", choosePlaceEvent);
-            }
         }
     }
 
@@ -308,17 +271,54 @@ public class YahtzeeHub : Hub
 
         if (lobby.ChoosePlace(player.UserId, placeId))
         {
-            YahtzeeOnChoosePlace choosePlaceEvent = new YahtzeeOnChoosePlace()
+            var choosePlaceEvent = new YahtzeeOnChoosePlace
             {
                 Players = lobby.GetPlayersModels(),
                 StartState = lobby.IsReadyToStart()
             };
 
-            foreach (YahtzeePlayer lobbyPlayer in lobby.Players)
-            {
+            foreach (var lobbyPlayer in lobby.Players)
                 await Clients.Client(lobbyPlayer.ConnectionId).SendAsync("ChoosePlaceStateCallback", choosePlaceEvent);
-            }
         }
+    }
+
+    public async Task OnOptionsPrivacyChange(bool state)
+    {
+        var context = YahtzeeContext.GetInfo(await GetUser());
+        var lobby = context.lobby;
+        var player = context.player;
+
+        if (lobby is null || player is null)
+        {
+            await ForcedLeave("OnOptionsPrivacyChange null value");
+            return;
+        }
+
+        if (player.UserId == lobby.LobbyCreatorId)
+        {
+            lobby.ChangePrivacy(state);
+
+            foreach (var lobbyPlayer in lobby.Players)
+                await Clients.Client(lobbyPlayer.ConnectionId).SendAsync("ChangePrivacyCallback", state);
+        }
+    }
+
+    public async Task OnOptionsGameTimeChange(int gameTime)
+    {
+        var context = YahtzeeContext.GetInfo(await GetUser());
+        var lobby = context.lobby;
+        var player = context.player;
+
+        if (lobby is null || player is null)
+        {
+            await ForcedLeave("OnOptionsGameTimeChange null value");
+            return;
+        }
+
+        if (player.UserId == lobby.LobbyCreatorId && lobby.ChangeGameTime(gameTime))
+            foreach (var lobbyPlayer in lobby.Players)
+                await Clients.Client(lobbyPlayer.ConnectionId)
+                    .SendAsync("ChangeGameTimeStateCallback", lobby.LobbyOptions.GameTime);
     }
 
     public async Task OnOptionsMaxPlayersChange(int maxPlayersCount)
@@ -337,16 +337,14 @@ public class YahtzeeHub : Hub
         {
             lobby.ChangeMaxPlayers(maxPlayersCount);
 
-            YahtzeeOptionsMaxPlayerChange status = new YahtzeeOptionsMaxPlayerChange()
+            var status = new YahtzeeOptionsMaxPlayerChange
             {
                 MaxPlayersState = maxPlayersCount,
                 Players = lobby.GetPlayersModels()
             };
 
-            foreach (YahtzeePlayer lobbyPlayer in lobby.Players)
-            {
+            foreach (var lobbyPlayer in lobby.Players)
                 await Clients.Client(lobbyPlayer.ConnectionId).SendAsync("ChangeMaxPlayersStateCallback", status);
-            }
         }
     }
 
@@ -362,33 +360,21 @@ public class YahtzeeHub : Hub
             return;
         }
 
-        if (!player.CanRoll || lobby is null)
-        {
-            return;
-        }
+        if (!player.CanRoll || lobby is null) return;
 
         player.RollCount--;
 
         if (dices.Length == 0)
-        {
-            foreach (YahtzeeDice dice in player.Dices)
-            {
+            foreach (var dice in player.Dices)
                 dice.Roll();
-            }
-        }
 
-        for (int i = 0; i < player.Dices.Length; i++)
-        {
+        for (var i = 0; i < player.Dices.Length; i++)
             if (!dices.Contains(i))
-            {
                 player.Dices[i].Roll();
-            }
-        }
 
-        foreach (YahtzeePlayer lobbyPlayer in lobby.Players)
-        {
-            await Clients.Client(lobbyPlayer.ConnectionId).SendAsync("SetDices", LobbyService.GetPlayer(player.UserId).Dices);
-        }
+        foreach (var lobbyPlayer in lobby.Players)
+            await Clients.Client(lobbyPlayer.ConnectionId)
+                .SendAsync("SetDices", LobbyService.GetPlayer(player.UserId).Dices);
     }
 
     public async Task<YahtzeeOnPointSetModel> OnPointSet(YahtzeePointType pointType)
@@ -404,49 +390,38 @@ public class YahtzeeHub : Hub
             return YahtzeeOnPointSetModel.UnSuccessFul;
         }
 
-        if (!lobby.GameStarted || lobby.PlayerRound != player)
-        {
-            return YahtzeeOnPointSetModel.UnSuccessFul;
-        }
+        if (!lobby.GameStarted || lobby.PlayerRound != player) return YahtzeeOnPointSetModel.UnSuccessFul;
 
         var point = player.SetPointsFromPoint(pointType);
 
-        if (!point.success)
-        {
-            return YahtzeeOnPointSetModel.UnSuccessFul;
-        }
+        if (!point.success) return YahtzeeOnPointSetModel.UnSuccessFul;
 
         await lobby.NextRound();
 
-        YahtzeePlayerModel[] playerModels = lobby.GetPlayersModels();
+        var playerModels = lobby.GetPlayersModels();
 
-        foreach (YahtzeePlayer lobbyPlayer in lobby.Players)
-        {
-            await Clients.Client(lobbyPlayer.ConnectionId).SendAsync("OnNextRound", new YahtzeeOnNextRoundModel()
+        foreach (var lobbyPlayer in lobby.Players)
+            await Clients.Client(lobbyPlayer.ConnectionId).SendAsync("OnNextRound", new YahtzeeOnNextRoundModel
             {
                 HasRound = lobbyPlayer == lobby.PlayerRound,
                 Players = playerModels,
                 Dices = lobby.PlayerRound.Dices
             });
-        }
 
-        return new YahtzeeOnPointSetModel()
+        return new YahtzeeOnPointSetModel
         {
             IsSuccessFul = point.success,
             Points = player.Points,
             PointsFromPoint = point.points,
-            Point = pointType,
+            Point = pointType
         };
     }
 
     private async Task<User?> GetUser()
     {
-        Claim? userClaim = Context?.User?.Claims.Where(x => x.Type == JwtRegisteredClaimNames.Jti).FirstOrDefault();
+        var userClaim = (Context?.User?.Claims).FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Jti);
 
-        if (userClaim is null || userClaim.Value is null)
-        {
-            return null;
-        }
+        if (userClaim is null || userClaim.Value is null) return null;
 
         return await Repository.GetByIdAsync(int.Parse(userClaim.Value));
     }

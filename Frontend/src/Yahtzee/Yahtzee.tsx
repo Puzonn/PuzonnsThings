@@ -2,17 +2,13 @@ import { useContext, useEffect, useState } from "react";
 import "./Yahtzee.css";
 import {
   Dice,
-  PointType,
-  RoomModel,
-  Player,
+  Endgame,
+  Lobby,
+  OptionsMaxPlayersState,
   PlayerCell,
   PointCell,
-  Endgame,
   PointCells,
-  Options,
-  OptionsMaxPlayersState,
-  GameTimer,
-  Lobby,
+  PointType,
 } from "../Types/YahtzeeTypes";
 import * as signalR from "@microsoft/signalr";
 import { Config } from "../Shared/Config";
@@ -21,12 +17,7 @@ import { useSearchParams } from "react-router-dom";
 import { UserContext } from "../Shared/UserContext";
 import { LobbyManager } from "../Shared/LobbyManager";
 import { CalculatePoints } from "./YahtzeeCalculator";
-import {
-  GetCellClass,
-  GetDiceImage,
-  GetPointsFromType,
-  HasSetPoint,
-} from "./YahtzeeUtil";
+import { GetCellClass, GetDiceImage, GetPointsFromType } from "./YahtzeeUtil";
 
 const hubConnection = new signalR.HubConnectionBuilder()
   .withUrl(Config.GetApiUrl() + "/services/yahtzeeservice", {
@@ -69,11 +60,35 @@ export const Yahtzee = () => {
     hubConnection.send("OnOptionsMaxPlayersChange", state);
   };
 
+  const ChangePrivacyState = (state: boolean) => {
+    hubConnection.send("OnOptionsPrivacyChange", state);
+  };
+
+  const ChangeGameTimeState = (state: number) => {
+    hubConnection.send("OnOptionsGameTimeChange", state);
+  };
+
+  const ChangeGameTimeStateCallback = (state: number) => {
+    setLobby((prev) => {
+      const option = prev.options;
+      option.gameTime = state;
+      return { ...prev, options: option, players: prev.players };
+    });
+  };
+
   const ChangeMaxPlayersStateCallback = (state: OptionsMaxPlayersState) => {
     setLobby((prev) => {
       const option = prev.options;
       option.maxPlayers = state.maxPlayersState;
       return { ...prev, options: option, players: state.players };
+    });
+  };
+
+  const ChangePrivacyCallback = (state: boolean) => {
+    setLobby((prev) => {
+      const option = prev.options;
+      option.isPublic = state;
+      return { ...prev, options: option, players: prev.players };
     });
   };
 
@@ -89,20 +104,19 @@ export const Yahtzee = () => {
 
   useEffect(() => {
     setTimeout(() => {
-      //Just a reducer to update times
+      //Use a reducer to update times
       setTimerTime((prev) => {
         return prev + 1;
       });
 
       setPlayerTimes((prev) => {
-        if (!lobby.gameStarted || timerState === false) {
+        if (!lobby.gameStarted || !timerState) {
           return prev;
         }
 
         const playerRound = lobby.players.find((x) => x.hasRound);
 
         if (!playerRound) {
-          console.error("Cannot find playerRound");
           return prev;
         }
 
@@ -116,9 +130,6 @@ export const Yahtzee = () => {
     hubConnection.send("OnLobbyPlaceClick", placeId);
   };
 
-  //Changes privacy option, where true == private game
-  const PrivacyChange = (state: boolean) => {};
-
   const ChoosePlaceState = (placeId: number) => {
     hubConnection.send("OnChoosePlaceState", placeId);
   };
@@ -126,7 +137,7 @@ export const Yahtzee = () => {
   const SetPointsFromType = (
     userId: number,
     pointType: PointType,
-    points: number
+    points: number,
   ) => {
     const placedPoints = [...lobby.playerCells];
 
@@ -192,7 +203,7 @@ export const Yahtzee = () => {
       startState: data.startState,
       isCreator: data.isCreator,
     };
-    console.log(data.options)
+    console.log(data.options);
     const times = {};
     for (const player of data.players) {
       (times as any)[player.userId] = player.gameTime;
@@ -331,15 +342,20 @@ export const Yahtzee = () => {
       window.history.pushState("", "", "/yahtzee?id=" + roomId);
 
       hubConnection.on("SetDices", setDices);
-      hubConnection.on(
-        "ChangeMaxPlayersStateCallback",
-        ChangeMaxPlayersStateCallback
-      );
       hubConnection.on("OnJoin", OnJoin);
       hubConnection.on("OnNextRound", OnNextRound);
       hubConnection.on("OnEndGame", OnEndGame);
       hubConnection.on("ForcedLeave", OnForcedLeave);
       hubConnection.on("ChoosePlaceStateCallback", ChoosePlaceStateCallback);
+      hubConnection.on("ChangePrivacyCallback", ChangePrivacyCallback);
+      hubConnection.on(
+        "ChangeGameTimeStateCallback",
+        ChangeGameTimeStateCallback,
+      );
+      hubConnection.on(
+        "ChangeMaxPlayersStateCallback",
+        ChangeMaxPlayersStateCallback,
+      );
       hubConnection.invoke("Join", roomId).then((canJoin) => {});
     });
   };
@@ -358,6 +374,8 @@ export const Yahtzee = () => {
     return (
       <div>
         <LobbyManager
+          OnChangeGameTimeState={ChangeGameTimeState}
+          OnChangePrivacyState={ChangePrivacyState}
           MaxPlayers={lobby.options.maxPlayers}
           OnStartClick={StartGame}
           StartReadyState={lobby.startState}
@@ -366,14 +384,15 @@ export const Yahtzee = () => {
           OnChangeMaxPlayersState={ChangeMaxPlayersState}
           OnLobbyPlaceClick={LobbyPlaceClick}
           LobbyId={lobby.lobbyId}
-          PrivacyOption={true}
+          PrivacyOption={lobby.options.isPublic}
           MinPlayers={2}
           LobbyUsers={lobby.players.map(
-            ({ username, lobbyPlaceId, userId }) => ({
+            ({ username, lobbyPlaceId, userId, avatar }) => ({
               Username: username,
               LobbyPlace: lobbyPlaceId,
               UserId: userId,
-            })
+              Avatar: avatar,
+            }),
           )}
           IsCreator={isCreator}
         ></LobbyManager>
@@ -443,7 +462,7 @@ export const Yahtzee = () => {
                       className={GetCellClass(
                         lobby.playerCells,
                         cell.userId,
-                        x.pointType
+                        x.pointType,
                       )}
                     >
                       {GetCell(cell.userId, x.pointType)}
